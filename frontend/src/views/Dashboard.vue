@@ -1,395 +1,400 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useTaskStore } from '../stores/tasks'
+import { useTaskStore, type Task } from '../stores/tasks'
 import { useAuthStore } from '../stores/auth'
+import AppHeader from '../components/AppHeader.vue'
+import Sidebar from '../components/Sidebar.vue'
 
 const router = useRouter()
 const taskStore = useTaskStore()
 const authStore = useAuthStore()
-const searchQuery = ref('')
-const isCreatingTask = ref(false)
-const isLoading = ref(true)
-const showReminders = ref(false)
 
-// Form state for creating a new task
-const newTask = ref({
-  title: '',
-  description: '',
-  status: 'pending',
-  dueDate: ''
+// Reactive variables
+const isLoading = ref(true)
+const activeReport = ref('overview')
+const searchQuery = ref('')
+const dateRange = ref({
+  start: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString().split('T')[0],
+  end: new Date().toISOString().split('T')[0]
 })
 
-// Filter tasks based on search query
+// Simulate loading
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false
+  }, 800)
+})
+
+// Computed properties for reports
 const filteredTasks = computed(() => {
   if (!searchQuery.value) return taskStore.tasks
   
   const query = searchQuery.value.toLowerCase()
   return taskStore.tasks.filter(task => 
     task.title.toLowerCase().includes(query) || 
-    (task.description && task.description.toLowerCase().includes(query))
+    (task.description?.toLowerCase().includes(query) || false)
   )
 })
 
-// Create a new task
-const createTask = () => {
-  if (!newTask.value.title || !newTask.value.dueDate) {
-    alert('Please fill in required fields')
-    return
-  }
+const totalTasks = computed(() => filteredTasks.value.length)
+
+const inProgressTasks = computed(() => 
+  filteredTasks.value.filter(task => task.status === 'in-progress').length
+)
+
+const completedTasks = computed(() => 
+  filteredTasks.value.filter(task => task.status === 'completed').length
+)
+
+const overdueTasks = computed(() => 
+  filteredTasks.value.filter(task => 
+    task.status !== 'completed' && new Date(task.dueDate) < new Date()
+  ).length
+)
+
+const tasksInDateRange = computed(() => {
+  const startDate = new Date(dateRange.value.start)
+  startDate.setHours(0, 0, 0, 0)
   
-  taskStore.createTask({
-    title: newTask.value.title,
-    description: newTask.value.description,
-    status: newTask.value.status as 'pending' | 'in-progress' | 'completed',
-    dueDate: newTask.value.dueDate
+  const endDate = new Date(dateRange.value.end)
+  endDate.setHours(23, 59, 59, 999)
+  
+  return filteredTasks.value.filter(task => {
+    const taskDate = new Date(task.dueDate)
+    return taskDate >= startDate && taskDate <= endDate
   })
+})
+
+const completionRate = computed(() => {
+  if (totalTasks.value === 0) return 0
+  return Math.round((completedTasks.value / totalTasks.value) * 100)
+})
+
+const statusDistribution = computed(() => {
+  const total = totalTasks.value
+  if (total === 0) return { completed: 0, inProgress: 0, pending: 0, overdue: 0 }
   
-  resetNewTaskForm()
-  isCreatingTask.value = false
-}
-
-// Update task status
-const updateTaskStatus = (taskId: number, newStatus: 'pending' | 'in-progress' | 'completed') => {
-  taskStore.updateTask(taskId, { status: newStatus })
-}
-
-// Delete a task
-const deleteTask = (taskId: number) => {
-  if (confirm('Are you sure you want to delete this task?')) {
-    taskStore.deleteTask(taskId)
+  const pending = filteredTasks.value.filter(task => 
+    task.status === 'pending' && new Date(task.dueDate) >= new Date()
+  ).length
+  
+  return {
+    completed: Math.round((completedTasks.value / total) * 100),
+    inProgress: Math.round((inProgressTasks.value / total) * 100),
+    pending: Math.round((pending / total) * 100),
+    overdue: Math.round((overdueTasks.value / total) * 100)
   }
+})
+
+// Weekly task completion data (simulated)
+const weeklyCompletionData = computed(() => {
+  const now = new Date()
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const result = []
+  
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
+    
+    // Count completed tasks on this day
+    const completedOnDay = filteredTasks.value.filter(task => {
+      const taskDate = new Date(task.dueDate)
+      return task.status === 'completed' && 
+        taskDate.getDate() === date.getDate() &&
+        taskDate.getMonth() === date.getMonth() &&
+        taskDate.getFullYear() === date.getFullYear()
+    }).length
+    
+    result.push({
+      day: days[date.getDay()],
+      count: completedOnDay
+    })
+  }
+  
+  return result
+})
+
+// Utility functions
+function formatDate(dateString: string): string {
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 
-// View task details
-const viewTaskDetails = (taskId: number) => {
+function handleSearch(): void {
+  console.log('Searching for:', searchQuery.value)
+}
+
+function viewTaskDetails(taskId: number): void {
   router.push(`/task/${taskId}`)
 }
 
-// Reset new task form
-const resetNewTaskForm = () => {
-  newTask.value = {
-    title: '',
-    description: '',
-    status: 'pending',
-    dueDate: ''
-  }
-}
-
-// Format date for display
-const formatDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = { 
-    year: 'numeric', 
-    month: 'short', 
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }
-  return new Date(dateString).toLocaleDateString('en-GB', options)
-}
-
-// Simulate loading
-onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false
-  }, 1000)
-})
-
-// Logout function
-const logout = () => {
+function logout(): void {
   authStore.logout()
   router.push('/login')
+}
+
+function updateDateRange(): void {
+  console.log('Date range updated:', dateRange.value)
 }
 </script>
 
 <template>
-  <div class="dashboard-container">
+  <div class="dashboard-task">
     <!-- Header section -->
-    <header class="header">
-      <div class="logo">
-        <h1>HMCTS Task Manager</h1>
-      </div>
-      <div class="header-actions">
-        <button class="reminder-button" @click="showReminders = !showReminders">
-          🔔 {{ taskStore.tasksDueSoon.length }} 
-        </button>
-        <div class="search-container">
-          <input 
-            type="text" 
-            v-model="searchQuery"
-            placeholder="Search tasks..."
-            class="search-input"
-          />
-        </div>
-        <button class="logout-button" @click="logout">Logout</button>
-      </div>
-    </header>
+    <AppHeader 
+      :reminderCount="taskStore.tasksDueSoon.length"
+      :reminderTasks="taskStore.tasksDueSoon"
+      @search="handleSearch"
+      @view-task="viewTaskDetails"
+      @logout="logout"
+    />
     
-    <!-- Reminders popover -->
-    <div v-if="showReminders && taskStore.tasksDueSoon.length > 0" class="reminders-popover">
-      <h3>Tasks Due Soon</h3>
-      <ul class="reminder-list">
-        <li v-for="task in taskStore.tasksDueSoon" :key="task.id" class="reminder-item">
-          <span class="reminder-title">{{ task.title }}</span>
-          <span class="reminder-due">Due: {{ formatDate(task.dueDate) }}</span>
-        </li>
-      </ul>
-    </div>
-    
-    <!-- Main content -->
-    <main class="main-content">
-      <!-- Loading state -->
-      <div v-if="isLoading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Loading tasks...</p>
-      </div>
+    <!-- Main Layout -->
+    <div class="dashboard-layout">
+      <Sidebar />
       
-      <div v-else>
-        <!-- Task actions section -->
-        <div class="task-actions">
-          <h2>My Tasks</h2>
-          <button class="create-button" @click="isCreatingTask = true">
-            + Create Task
-          </button>
+      <!-- Main Content -->
+      <main class="dashboard-main">
+        <!-- Loading State -->
+        <div v-if="isLoading" class="loading-container">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Loading reports data...</p>
         </div>
-        
-        <!-- Create task form -->
-        <div v-if="isCreatingTask" class="create-task-form">
-          <h3>Create New Task</h3>
-          
-          <div class="form-group">
-            <label for="title">Title *</label>
-            <input 
-              id="title" 
-              type="text" 
-              v-model="newTask.title" 
-              placeholder="Enter task title"
-              required
-            />
-          </div>
-          
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea 
-              id="description" 
-              v-model="newTask.description" 
-              placeholder="Enter task description (optional)"
-              rows="3"
-            ></textarea>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="status">Status *</label>
-              <select id="status" v-model="newTask.status">
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
+  
+        <!-- Reports Content -->
+        <div v-else class="main-content">
+          <!-- Page header -->
+          <div class="page-header">
+            <div class="page-title">
+              <h1>Task Reports</h1>
+              <p class="subtitle">Analytics and insights about your task management</p>
             </div>
-            
-            <div class="form-group">
-              <label for="due-date">Due Date/Time *</label>
-              <input 
-                id="due-date" 
-                type="datetime-local" 
-                v-model="newTask.dueDate"
-                required
-              />
-            </div>
-          </div>
-          
-          <div class="form-actions">
-            <button 
-              class="cancel-button" 
-              @click="isCreatingTask = false"
-            >
-              Cancel
-            </button>
-            <button 
-              class="save-button" 
-              @click="createTask"
-            >
-              Create Task
-            </button>
-          </div>
-        </div>
-        
-        <!-- Tasks list -->
-        <div class="tasks-list">
-          <div v-if="filteredTasks.length === 0" class="no-tasks">
-            <p>No tasks found. Create a new task to get started.</p>
-          </div>
-          
-          <div 
-            v-for="task in filteredTasks" 
-            :key="task.id" 
-            class="task-card"
-            :class="{ 'completed': task.status === 'completed' }"
-            @click="viewTaskDetails(task.id)"
-          >
-            <div class="task-header">
-              <h3 class="task-title">{{ task.title }}</h3>
-              <div class="task-status" :class="task.status">
-                {{ task.status.replace('-', ' ') }}
+            <div class="date-filter">
+              <div class="date-range">
+                <label for="start-date">From:</label>
+                <input 
+                  type="date" 
+                  id="start-date" 
+                  v-model="dateRange.start" 
+                  @change="updateDateRange"
+                />
+              </div>
+              <div class="date-range">
+                <label for="end-date">To:</label>
+                <input 
+                  type="date" 
+                  id="end-date" 
+                  v-model="dateRange.end"
+                  @change="updateDateRange"
+                />
               </div>
             </div>
-            
-            <div class="task-body">
-              <p v-if="task.description" class="task-description">
-                {{ task.description }}
-              </p>
-              <p class="task-due-date">
-                Due: {{ formatDate(task.dueDate) }}
-              </p>
+          </div>
+  
+          <!-- Report Types Navigation -->
+          <div class="report-tabs">
+            <button 
+              @click="activeReport = 'overview'" 
+              :class="{ active: activeReport === 'overview' }"
+            >
+              Overview
+            </button>
+            <button 
+              @click="activeReport = 'completion'" 
+              :class="{ active: activeReport === 'completion' }"
+            >
+              Completion Rate
+            </button>
+            <button 
+              @click="activeReport = 'status'" 
+              :class="{ active: activeReport === 'status' }"
+            >
+              Status Distribution
+            </button>
+            <button 
+              @click="activeReport = 'time'" 
+              :class="{ active: activeReport === 'time' }"
+            >
+              Time Analysis
+            </button>
+          </div>
+  
+          <!-- Summary Cards -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <h3>Total Tasks</h3>
+              <div class="metric-value">{{ totalTasks }}</div>
             </div>
-            
-            <div class="task-actions" @click.stop>
-              <select 
-                :value="task.status" 
-                @change="updateTaskStatus(task.id, $event.target as HTMLSelectElement ? ($event.target as HTMLSelectElement).value as 'pending' | 'in-progress' | 'completed' : 'pending')"
-                class="status-select"
-              >
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
-              <button class="delete-button" @click="deleteTask(task.id)">
-                Delete
-              </button>
+            <div class="metric-card">
+              <h3>In Progress</h3>
+              <div class="metric-value">{{ inProgressTasks }}</div>
+            </div>
+            <div class="metric-card">
+              <h3>Completed</h3>
+              <div class="metric-value">{{ completedTasks }}</div>
+            </div>
+            <div class="metric-card">
+              <h3>Overdue</h3>
+              <div class="metric-value">{{ overdueTasks }}</div>
             </div>
           </div>
+  
+          <!-- Completion Rate Chart -->
+          <div v-if="activeReport === 'overview' || activeReport === 'completion'" class="chart-section">
+            <h2>Task Completion Rate</h2>
+            <div class="completion-rate">
+              <div class="progress-circle">
+                <svg viewBox="0 0 36 36">
+                  <path class="circle-bg"
+                    d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <path class="circle"
+                    :stroke-dasharray="`${completionRate}, 100`"
+                    d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831"
+                  />
+                  <text x="18" y="20.35" class="percentage">{{ completionRate }}%</text>
+                </svg>
+              </div>
+              <div class="completion-details">
+                <h3>Completion Summary</h3>
+                <p>You have completed {{ completedTasks }} out of {{ totalTasks }} tasks in the selected period.</p>
+                <p>Current completion rate: <strong>{{ completionRate }}%</strong></p>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Status Distribution Chart -->
+          <div v-if="activeReport === 'overview' || activeReport === 'status'" class="chart-section">
+            <h2>Task Status Distribution</h2>
+            <div class="status-distribution">
+              <div class="bar-chart">
+                <div class="bar-container">
+                  <div class="bar-label">Completed</div>
+                  <div class="bar-outer">
+                    <div class="bar-inner completed" :style="`width: ${statusDistribution.completed}%`"></div>
+                  </div>
+                  <div class="bar-value">{{ statusDistribution.completed }}%</div>
+                </div>
+                <div class="bar-container">
+                  <div class="bar-label">In Progress</div>
+                  <div class="bar-outer">
+                    <div class="bar-inner in-progress" :style="`width: ${statusDistribution.inProgress}%`"></div>
+                  </div>
+                  <div class="bar-value">{{ statusDistribution.inProgress }}%</div>
+                </div>
+                <div class="bar-container">
+                  <div class="bar-label">Pending</div>
+                  <div class="bar-outer">
+                    <div class="bar-inner pending" :style="`width: ${statusDistribution.pending}%`"></div>
+                  </div>
+                  <div class="bar-value">{{ statusDistribution.pending }}%</div>
+                </div>
+                <div class="bar-container">
+                  <div class="bar-label">Overdue</div>
+                  <div class="bar-outer">
+                    <div class="bar-inner overdue" :style="`width: ${statusDistribution.overdue}%`"></div>
+                  </div>
+                  <div class="bar-value">{{ statusDistribution.overdue }}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Weekly Activity Chart -->
+          <div v-if="activeReport === 'overview' || activeReport === 'time'" class="chart-section">
+            <h2>Weekly Task Completion</h2>
+            <div class="weekly-chart">
+              <div class="weekly-bars">
+                <div 
+                  v-for="(day, index) in weeklyCompletionData" 
+                  :key="index" 
+                  class="weekly-bar-container"
+                >
+                  <div 
+                    class="weekly-bar" 
+                    :style="`height: ${day.count * 20}px`"
+                  ></div>
+                  <div class="weekly-day">{{ day.day }}</div>
+                  <div class="weekly-count">{{ day.count }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Tasks in Date Range Table -->
+          <div class="tasks-table-container">
+            <h2>Tasks in Selected Period</h2>
+            <table class="tasks-table" v-if="tasksInDateRange.length > 0">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Due Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="task in tasksInDateRange" :key="task.id">
+                  <td>{{ task.title }}</td>
+                  <td>
+                    <span :class="['status-pill', `status-${task.status}`]">
+                      {{ task.status.replace('-', ' ') }}
+                    </span>
+                  </td>
+                  <td>{{ formatDate(task.dueDate) }}</td>
+                  <td>
+                    <button @click="viewTaskDetails(task.id)" class="view-btn">View</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p v-else class="no-tasks">No tasks found in the selected date range.</p>
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.dashboard-container {
+.dashboard-task {
   min-height: 100vh;
-  background-color: #f6f7fb;
+  background-color: #f5f7fa;
 }
 
-.header {
+.loading-container {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.logo h1 {
-  color: #0066ff;
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.search-container {
-  position: relative;
-}
-
-.search-input {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 240px;
-  font-size: 14px;
-}
-
-.search-input:focus {
-  border-color: #0066ff;
-  outline: none;
-}
-
-.reminder-button {
-  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: transparent;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 12px;
+  height: 300px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 115, 234, 0.1);
+  border-radius: 50%;
+  border-top-color: #0073ea;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  color: #676879;
   font-size: 14px;
-  cursor: pointer;
-  position: relative;
-}
-
-.reminder-button:hover {
-  background-color: #f5f5f5;
-}
-
-.logout-button {
-  background-color: transparent;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.logout-button:hover {
-  background-color: #f5f5f5;
-}
-
-.reminders-popover {
-  position: absolute;
-  top: 65px;
-  right: 200px;
-  width: 300px;
-  background-color: white;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 16px;
-  z-index: 20;
-}
-
-.reminders-popover h3 {
-  margin-top: 0;
-  color: #333;
-  font-size: 16px;
-  font-weight: 600;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.reminder-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.reminder-item {
-  padding: 8px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.reminder-item:last-child {
-  border-bottom: none;
-}
-
-.reminder-title {
-  display: block;
-  font-weight: 500;
-  color: #333;
-}
-
-.reminder-due {
-  display: block;
-  font-size: 12px;
-  color: #e65050;
-  margin-top: 4px;
 }
 
 .main-content {
@@ -398,282 +403,383 @@ const logout = () => {
   margin: 0 auto;
 }
 
-.loading-container {
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.page-title h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #323338;
+  margin: 0 0 8px 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #676879;
+  margin: 0;
+}
+
+.date-filter {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.date-range label {
+  font-size: 14px;
+  color: #676879;
+}
+
+.date-range input {
+  padding: 8px;
+  border: 1px solid #c3c6d4;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.report-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e6e9ef;
+  padding-bottom: 8px;
+}
+
+.report-tabs button {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: #676879;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.report-tabs button:hover {
+  background-color: #f0f0f5;
+}
+
+.report-tabs button.active {
+  background-color: #0073ea;
+  color: white;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metric-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.metric-card h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #676879;
+  margin: 0 0 8px 0;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #323338;
+}
+
+.chart-section {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-section h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #323338;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.completion-rate {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.progress-circle {
+  width: 150px;
+  height: 150px;
+}
+
+.progress-circle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.circle-bg {
+  fill: none;
+  stroke: #eee;
+  stroke-width: 3.8;
+}
+
+.circle {
+  fill: none;
+  stroke: #0073ea;
+  stroke-width: 3.8;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dasharray 0.5s;
+}
+
+.percentage {
+  fill: #323338;
+  font-size: 0.5em;
+  text-anchor: middle;
+  font-weight: bold;
+}
+
+.completion-details h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #323338;
+  margin: 0 0 8px 0;
+}
+
+.completion-details p {
+  font-size: 14px;
+  color: #676879;
+  margin: 0 0 8px 0;
+}
+
+.status-distribution {
+  padding: 16px 0;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bar-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bar-label {
+  width: 100px;
+  font-size: 14px;
+  color: #323338;
+}
+
+.bar-outer {
+  flex-grow: 1;
+  height: 16px;
+  background-color: #f0f0f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.bar-inner {
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.5s;
+}
+
+.bar-inner.completed {
+  background-color: #4CAF50;
+}
+
+.bar-inner.in-progress {
+  background-color: #2196F3;
+}
+
+.bar-inner.pending {
+  background-color: #FFC107;
+}
+
+.bar-inner.overdue {
+  background-color: #F44336;
+}
+
+.bar-value {
+  width: 50px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+  color: #323338;
+}
+
+.weekly-chart {
+  padding: 16px 0;
+}
+
+.weekly-bars {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  height: 200px;
+}
+
+.weekly-bar-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 400px;
-}
-
-.loading-spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top: 4px solid #0066ff;
   width: 40px;
-  height: 40px;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.weekly-bar {
+  width: 24px;
+  background-color: #0073ea;
+  border-radius: 4px 4px 0 0;
+  transition: height 0.5s;
+  min-height: 4px;
 }
 
-.task-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+.weekly-day {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #676879;
 }
 
-.task-actions h2 {
-  margin: 0;
-  font-size: 24px;
-  color: #333;
-}
-
-.create-button {
-  background-color: #0066ff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.create-button:hover {
-  background-color: #0052cc;
-}
-
-.create-task-form {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 24px;
-  margin-bottom: 24px;
-}
-
-.create-task-form h3 {
-  margin-top: 0;
-  margin-bottom: 24px;
-  font-size: 18px;
-  color: #333;
-}
-
-.form-group {
-  margin-bottom: 16px;
-}
-
-.form-row {
-  display: flex;
-  gap: 16px;
-}
-
-.form-row .form-group {
-  flex: 1;
-}
-
-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  color: #333;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: #0066ff;
-  outline: none;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  margin-top: 24px;
-}
-
-.cancel-button {
-  background-color: #f5f5f5;
-  color: #666;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 16px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.cancel-button:hover {
-  background-color: #e5e5e5;
-}
-
-.save-button {
-  background-color: #0066ff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.save-button:hover {
-  background-color: #0052cc;
-}
-
-.tasks-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.no-tasks {
-  grid-column: 1 / -1;
-  background-color: white;
-  border-radius: 8px;
-  padding: 48px 24px;
-  text-align: center;
-  color: #666;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.task-card {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 16px;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.task-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.task-card.completed {
-  opacity: 0.7;
-}
-
-.task-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-
-.task-title {
-  margin: 0;
-  font-size: 16px;
+.weekly-count {
+  font-size: 12px;
   font-weight: 600;
+  color: #323338;
+  margin-top: 4px;
 }
 
-.task-status {
+.tasks-table-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tasks-table-container h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #323338;
+  margin: 0 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.tasks-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tasks-table th {
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #676879;
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.tasks-table td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #323338;
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 4px;
   text-transform: capitalize;
 }
 
-.task-status.pending {
-  background-color: #fff4e5;
-  color: #ff9800;
+.status-pending {
+  background-color: #FFF8E1;
+  color: #F57C00;
 }
 
-.task-status.in-progress {
-  background-color: #e3f2fd;
-  color: #2196f3;
+.status-in-progress {
+  background-color: #E3F2FD;
+  color: #1976D2;
 }
 
-.task-status.completed {
-  background-color: #e8f5e9;
-  color: #4caf50;
+.status-completed {
+  background-color: #E8F5E9;
+  color: #388E3C;
 }
 
-.task-body {
-  margin-bottom: 16px;
-}
-
-.task-description {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  color: #666;
-  line-height: 1.4;
-}
-
-.task-due-date {
-  margin: 0;
-  font-size: 13px;
-  color: #333;
-  font-weight: 500;
-}
-
-.task-actions {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 12px;
-  border-top: 1px solid #eee;
-}
-
-.status-select {
-  padding: 6px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  width: auto;
-  font-size: 13px;
-}
-
-.delete-button {
-  background-color: #f44336;
-  color: white;
+.view-btn {
+  padding: 4px 8px;
+  background-color: #f0f0f5;
   border: none;
   border-radius: 4px;
-  padding: 6px 12px;
-  font-size: 13px;
+  color: #323338;
+  font-size: 12px;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.delete-button:hover {
-  background-color: #d32f2f;
+.view-btn:hover {
+  background-color: #e6e9ef;
+}
+
+.no-tasks {
+  text-align: center;
+  padding: 24px;
+  color: #676879;
+  font-size: 14px;
 }
 
 @media (max-width: 768px) {
-  .form-row {
+  .page-header {
     flex-direction: column;
-    gap: 0;
-  }
-  
-  .tasks-list {
-    grid-template-columns: 1fr;
-  }
-  
-  .header {
-    flex-direction: column;
-    gap: 16px;
     align-items: flex-start;
+    gap: 16px;
   }
   
-  .header-actions {
+  .date-filter {
     width: 100%;
     flex-wrap: wrap;
   }
   
-  .search-input {
-    width: 100%;
+  .completion-rate {
+    flex-direction: column;
+  }
+  
+  .bar-container {
+    flex-wrap: wrap;
+  }
+  
+  .bar-label {
+    width: auto;
+    min-width: 80px;
   }
 }
 </style> 
