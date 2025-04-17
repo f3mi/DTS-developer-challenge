@@ -57,15 +57,9 @@ const viewTask = (taskId: number) => {
     <div class="header-container">
       <!-- Logo section -->
       <div class="logo-section">
-        <div class="monday-logo">
-          <svg viewBox="0 0 136 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M98.0717 21.3943C98.0717 17.0307 94.5449 13.631 90.0361 13.631C85.5273 13.631 82.0004 17.0307 82.0004 21.3943C82.0004 25.7579 85.5272 29.1577 90.0361 29.1577C94.5449 29.1577 98.0717 25.7579 98.0717 21.3943Z" fill="#FF3D57"/>
-            <path d="M70.8345 21.3943C70.8345 17.0307 67.3078 13.631 62.7989 13.631C58.29 13.631 54.7632 17.0307 54.7632 21.3943C54.7632 25.7579 58.29 29.1577 62.7989 29.1577C67.3078 29.1577 70.8345 25.7579 70.8345 21.3943Z" fill="#FFCC00"/>
-            <path d="M43.5975 21.3943C43.5975 17.0307 40.0708 13.631 35.5619 13.631C31.053 13.631 27.5262 17.0307 27.5262 21.3943C27.5262 25.7579 31.053 29.1577 35.5619 29.1577C40.0708 29.1577 43.5975 25.7579 43.5975 21.3943Z" fill="#00D647"/>
-            <path d="M16.3604 21.3943C16.3604 17.0307 12.8336 13.631 8.32472 13.631C3.81585 13.631 0.289062 17.0307 0.289062 21.3943C0.289062 25.7579 3.81585 29.1577 8.32472 29.1577C12.8336 29.1577 16.3604 25.7579 16.3604 21.3943Z" fill="#00A0FF"/>
-          </svg>
+        <div class="logo">
+          <img src="../assets/logo.svg" alt="HMCTS Task Manager Logo" class="logo-img" />
         </div>
-        <span class="product-name">Task Manager</span>
       </div>
 
       <!-- Search section -->
@@ -146,16 +140,13 @@ const viewTask = (taskId: number) => {
   align-items: center;
 }
 
-.monday-logo {
-  width: 40px;
-  height: 40px;
+.logo {
+  height: 36px;
 }
 
-.product-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #323338;
-  margin-left: 8px;
+.logo-img {
+  height: 100%;
+  width: auto;
 }
 
 .search-section {

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50">
+  <!-- Rounded-square icon background -->
+  <rect x="0" y="0" width="50" height="50" rx="8" fill="#0052CC"/>
+  <!-- Checkmark -->
+  <polyline points="14,28 22,36 36,14"
+            fill="none"
+            stroke="#FFFFFF"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+</svg> 

@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import logoSrc from '../../assets/logo.svg'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -34,8 +35,7 @@ const login = async () => {
     <div class="login-container">
       <div class="login-content">
         <div class="logo-container">
-          <svg class="app-logo" viewBox="0 0 136 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-             </svg>
+          <img :src="logoSrc" alt="App Logo" class="app-logo" />
         </div>
         
         <div class="form-container">
@@ -161,11 +161,17 @@ const login = async () => {
 .logo-container {
   text-align: center;
   margin-bottom: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .app-logo {
-  height: 36px;
-  width: auto;
+  width: 200px;
+  height: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  display: block;
 }
 
 .login-title {

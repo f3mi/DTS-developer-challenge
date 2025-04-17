@@ -28,3 +28,4 @@ pnpm-debug.log*
 .editorconfig
 .gitattributes
 .prettierrc.json
+frontend/src/views/Reports.vue
