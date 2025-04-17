@@ -82,15 +82,6 @@ const toggleTheme = () => {
             <span>Calendar</span>
           </li>
         </router-link>
-
-        <router-link to="/reports">
-          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': currentRoute === 'reports' }">
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M16 16V8M12 16V4M8 16v-5M4 16v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <span>Reports</span>
-          </li>
-        </router-link>
       </ul>
     </div>
 
