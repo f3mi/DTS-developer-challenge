@@ -4,9 +4,12 @@ This is the backend API for the Task Management System developed for the HMCTS D
 
 ## 🔧 Features
 
-- Create, retrieve, update, and delete tasks
-- Store data using PostgreSQL
+- Full CRUD operations for task management
+- User authentication with JWT and password hashing
+- Secure API endpoints with middleware protection
+- Database integration with PostgreSQL and Sequelize ORM
 - Input validation and structured error handling
+- Comprehensive error responses
 - Unit testing with Jest
 - Modular code structure with MVC pattern
 
@@ -18,6 +21,8 @@ This is the backend API for the Task Management System developed for the HMCTS D
 - Express.js
 - PostgreSQL
 - Sequelize ORM
+- JWT for authentication
+- Bcrypt for password hashing
 - Jest (Testing)
 
 ---
@@ -26,9 +31,9 @@ This is the backend API for the Task Management System developed for the HMCTS D
 
 ### Prerequisites
 
-- Node.js
-- PostgreSQL
-- npm or yarn
+- Node.js (v14 or higher)
+- PostgreSQL (v12 or higher)
+- npm (v6 or higher)
 
 ### Installation
 
@@ -43,28 +48,6 @@ npm install
 ### Configuration
 
 1. Create a PostgreSQL database for the application
-2. Copy `.env.example` to `.env` and update the database configuration
-3. Set up the database and run migrations:
-
-```bash
-npm run migrate
-```
-
-4. (Optional) Seed the database with sample data:
-
-```bash
-npm run seed
-```
-
-This will create sample users and tasks for testing purposes.
-
-### Database Setup
-
-1. Create a PostgreSQL database for the application:
-   ```bash
-   createdb task_management
-   ```
-
 2. Copy `.env.example` to `.env` and update the database configuration:
    ```
    DB_HOST=localhost
@@ -72,35 +55,48 @@ This will create sample users and tasks for testing purposes.
    DB_NAME=task_management
    DB_USER=your_db_username
    DB_PASSWORD=your_db_password
+   JWT_SECRET=your_jwt_secret
    ```
 
-3. Run the migrations to set up the database schema:
-   ```bash
-   npm run migrate
-   ```
+3. Set up the database and run migrations:
 
-4. (Optional) Seed the database with sample users and tasks:
-   ```bash
-   npm run seed
-   ```
+```bash
+npx sequelize-cli db:migrate
+```
 
-### Migrations and Models
+4. (Optional) Seed the database with sample data:
 
-The application uses Sequelize as the ORM with the following models:
+```bash
+npx sequelize-cli db:seed:all
+```
 
-1. **User Model**
-   - Stores user information and authentication details
-   - Fields: id, name, email, password, role
+This will create sample users and tasks for testing purposes.
 
-2. **Task Model**
-   - Stores task information associated with users
-   - Fields: id, title, description, status, dueDate, userId
+### Running the API
 
-Migrations are managed with sequelize-cli and can be found in the `migrations` folder:
-- `20230501000000-create-users.js` - Creates the users table
-- `20230501000001-create-tasks.js` - Creates the tasks table with foreign key to users
+Start the development server:
 
-## API Endpoints
+```bash
+npm run dev
+```
+
+The API will be available at `http://localhost:3000`.
+
+For production:
+
+```bash
+npm start
+```
+
+### Running Tests
+
+Execute the test suite:
+
+```bash
+npm test
+```
+
+## 📚 API Endpoints
 
 ### Authentication
 
@@ -118,6 +114,11 @@ Migrations are managed with sequelize-cli and can be found in the `migrations` f
 ### Tasks
 
 - `GET /api/tasks` - Get all tasks for the authenticated user
+  - Query parameters: 
+    - `status` (optional): Filter by status
+    - `search` (optional): Search in title/description
+    - `startDate` (optional): Filter by due date range (start)
+    - `endDate` (optional): Filter by due date range (end)
   - Response: `{ tasks }`
 
 - `GET /api/tasks/:id` - Get a single task by ID
@@ -131,24 +132,87 @@ Migrations are managed with sequelize-cli and can be found in the `migrations` f
   - Request body: `{ title?, description?, status?, dueDate? }`
   - Response: `{ task }`
 
+- `PATCH /api/tasks/:id/status` - Update task status only
+  - Request body: `{ status }`
+  - Response: `{ task }`
+
 - `DELETE /api/tasks/:id` - Delete a task
   - Response: `{ message: 'Task deleted successfully' }`
 
-## Models
+## 🗄️ Data Models
 
 ### User
 
-- `id` - Integer (Primary Key)
+- `id` - Integer (Primary Key, Auto-increment)
 - `name` - String (Required)
 - `email` - String (Required, Unique)
-- `password` - String (Required)
-- `role` - String (Default: 'user')
+- `password` - String (Required, Hashed)
+- `createdAt` - DateTime
+- `updatedAt` - DateTime
 
 ### Task
 
-- `id` - Integer (Primary Key)
+- `id` - Integer (Primary Key, Auto-increment)
 - `title` - String (Required)
 - `description` - Text (Optional)
 - `status` - Enum ('pending', 'in-progress', 'completed') (Default: 'pending')
 - `dueDate` - DateTime (Required)
 - `userId` - Integer (Foreign Key to User)
+- `createdAt` - DateTime
+- `updatedAt` - DateTime
+
+## 🔒 Authentication & Security
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- Protected routes with middleware
+- Input validation to prevent injection attacks
+- Proper error handling and sanitized error responses
+
+## 📁 Project Structure
+
+```
+backend/
+├── config/             # Configuration files (database, etc.)
+├── controllers/        # Request handlers
+├── middleware/         # Custom middleware (auth, validation, etc.)
+├── migrations/         # Sequelize migrations
+├── models/             # Sequelize models
+├── routes/             # API route definitions
+├── seeders/            # Database seed files
+├── tests/              # Unit and integration tests
+├── utils/              # Utility functions
+├── app.js              # Express application setup
+└── server.js           # Server entry point
+```
+
+## 🔄 Environment Variables
+
+The following environment variables can be configured:
+
+- `PORT` - The port the server runs on (default: 3000)
+- `NODE_ENV` - Environment ('development', 'test', 'production')
+- `DB_HOST` - Database host
+- `DB_PORT` - Database port
+- `DB_NAME` - Database name
+- `DB_USER` - Database user
+- `DB_PASSWORD` - Database password
+- `JWT_SECRET` - Secret for JWT token generation
+- `JWT_EXPIRES_IN` - Token expiration time (default: '24h')
+
+## 🚨 Error Handling
+
+The API uses structured error responses, including:
+```json
+{
+  "error": {
+    "message": "Error message",
+    "code": "ERROR_CODE",
+    "details": {} // Optional additional information
+  }
+}
+```
+
+## 🤝 Contributing
+
+See the main repository README for contribution guidelines.

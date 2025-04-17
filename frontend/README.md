@@ -1,34 +1,202 @@
 # HMCTS Task Management System - Frontend
 
-This is the frontend for the HMCTS Task Management System, built with Vue.js 3 and Bootstrap.
+This is the frontend application for the HMCTS Task Management System, built with Vue.js 3, Pinia for state management, and a custom CSS theming system with light/dark mode support.
 
-## Features
+## ✨ Features
 
-The frontend application allows caseworkers to:
+- **Task Management:**
+  - Create, view, update, and delete tasks
+  - Update task status dynamically
+  - Filter tasks by status, date range, and search term
+  - View task details and edit task information
 
-- Create new tasks with title, description, status, and due date
-- View all tasks in a user-friendly interface
-- Update the status of existing tasks
-- Delete tasks when they are no longer needed
+- **Dashboard:**
+  - Overview of task metrics
+  - Task completion rates
+  - Due date distributions
+  - Interactive charts and reports
 
-## Requirements
+- **Calendar View:**
+  - Visual display of tasks by date
+  - Task management directly from calendar interface
+  - Month navigation and date selection
 
-The frontend expects a backend API running on `http://localhost:3000/api`. Make sure the backend is running before starting the frontend application.
+- **Reports:**
+  - Task analytics with Chart.js visualizations
+  - Progress tracking and trend analysis
+  - Exportable task statistics
 
-## Component Structure
+- **User Experience:**
+  - Responsive design for all devices
+  - Dark/light theme with system preference detection
+  - Toast notification system
+  - Idle timer for automatic logout after 60 seconds of inactivity
 
-- `App.vue` - Main application component that integrates TaskForm and TaskList
-- `TaskForm.vue` - Component for creating new tasks
-- `TaskList.vue` - Component for displaying and managing existing tasks
-- `TaskService.js` - Service for handling API calls to the backend
+## 🛠️ Technologies Used
 
-## Technologies Used
+- **Vue.js 3** - Frontend framework with Composition API
+- **Pinia** - State management
+- **Vue Router** - Client-side routing
+- **Axios** - HTTP client for API requests
+- **Chart.js** - Data visualization
+- **CSS** - Custom theming system with CSS variables
 
-- Vue.js 3 - Frontend framework
-- Bootstrap 5 & Tailwind CSS - UI components and styling
-- Axios - HTTP client for API requests
-- Pinia - State Management
+## 🏗️ Project Structure
 
+```
+frontend/
+├── public/             # Static files
+├── src/
+│   ├── assets/         # Images, fonts, etc.
+│   ├── components/     # Reusable UI components
+│   │   ├── AppHeader.vue
+│   │   ├── Sidebar.vue
+│   │   ├── TaskCard.vue
+│   │   └── NotificationToast.vue
+│   ├── views/          # Page components
+│   │   ├── Dashboard.vue
+│   │   ├── Tasks.vue
+│   │   ├── TaskDetails.vue
+│   │   ├── Calendar.vue
+│   │   ├── Reports.vue
+│   │   ├── Login.vue
+│   │   └── Register.vue
+│   ├── stores/         # Pinia stores
+│   │   ├── auth.ts     # Authentication state
+│   │   ├── tasks.ts    # Task management
+│   │   ├── theme.ts    # Theme management
+│   │   └── notification.ts # Toast notifications
+│   ├── router/         # Vue Router configuration
+│   ├── utils/          # Utility functions
+│   │   └── idleTimer.ts # User activity tracking
+│   ├── App.vue         # Root component
+│   └── main.js         # Application entry point
+├── .env.example        # Environment variables template
+└── vite.config.js      # Vite configuration
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- Backend API running (default: http://localhost:3000)
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/hmcts/dts-developer-challenge.git
+
+# Navigate to frontend directory
+cd dts-developer-challenge/frontend
+
+# Install dependencies
+npm install
+
+# Copy environment file and configure if needed
+cp .env.example .env
+```
+
+### Development
+
+```bash
+# Start development server
+npm run dev
+```
+
+The application will be available at `http://localhost:5173`.
+
+### Building for Production
+
+```bash
+# Build optimized version
+npm run build
+```
+
+The built files will be in the `dist/` directory.
+
+### Linting
+
+```bash
+# Run ESLint
+npm run lint
+```
+
+## 📚 Core Features
+
+### Authentication System
+
+The application includes a complete authentication system:
+- User registration
+- Login with email/password
+- JWT token management
+- Automatic session timeout
+- Secure route protection
+
+### Task Management
+
+Tasks are managed through a Pinia store (`src/stores/tasks.ts`):
+- `fetchTasks()` - Get all tasks with optional filtering
+- `getTaskById(id)` - Get a specific task
+- `createTask(task)` - Create a new task
+- `updateTask(id, updates)` - Update a task
+- `deleteTask(id)` - Delete a task
+
+### Theming System
+
+The application supports light and dark themes:
+- Theme toggle in the sidebar
+- System preference detection
+- Theme persistence in local storage
+- CSS variables for consistent theming
+- Smooth transitions between themes
+
+### Idle Timer
+
+For security, the application includes an idle timer:
+- Automatically logs out users after 60 seconds of inactivity
+- Displays a warning 15 seconds before logout
+- Tracks user interactions (mouse, keyboard)
+- Provides option to continue session
+- Configurable timeout duration
+
+### Toast Notifications
+
+A custom notification system provides feedback:
+- Success notifications for completed actions
+- Error notifications with details
+- Warning and information notifications
+- Auto-dismissing after 3 seconds
+- Manual dismiss option
+
+## 📱 Responsive Design
+
+The application is fully responsive:
+- Desktop-optimized layout
+- Tablet-friendly interface
+- Mobile-responsive design
+- Collapsible sidebar on small screens
+- Touch-friendly controls
+
+## 🧪 Testing
+
+```bash
+# Run unit tests
+npm run test:unit
+
+# Run end-to-end tests
+npm run test:e2e
+```
+
+## 🤝 Contributing
+
+See the main repository README for contribution guidelines.
+
+## 📝 License
+
+This project is licensed under the MIT License - see the main repository LICENSE file for details.
 
 ## Recommended IDE Setup
 

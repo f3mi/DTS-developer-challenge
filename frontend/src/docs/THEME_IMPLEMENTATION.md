@@ -28,7 +28,7 @@ Our application uses a theme system based on CSS variables defined in the root e
 
 ## Using Theme CSS Classes
 
-We've created a set of utility classes in `assets/styles/theme.css` that can be applied to elements to automatically handle theme changes:
+I've created a set of utility classes in `assets/styles/theme.css` that can be applied to elements to automatically handle theme changes:
 
 ### Container Classes
 - `theme-view-container` - For root view elements (applies bg color and full height)
@@ -56,7 +56,7 @@ We've created a set of utility classes in `assets/styles/theme.css` that can be 
 
 ## Using CSS Variables
 
-Instead of hardcoding colors in your components, use CSS variables:
+Instead of hardcoding colors in my components, use CSS variables:
 
 ```css
 /* Incorrect ❌ */
@@ -147,14 +147,13 @@ watch(() => themeStore.isDark, () => {
 
 ## Checklist For Each View
 
-- [ ] Dashboard.vue
-- [ ] TaskDetails.vue
-- [ ] Tasks.vue
-- [ ] Calendar.vue
-- [x] Reports.vue
+- [x] Dashboard.vue
+- [x] TaskDetails.vue
+- [x] Tasks.vue
+- [x] Calendar.vue
 - [x] Login.vue
-- [ ] Register.vue
-- [ ] ErrorPage.vue
+- [x] Register.vue
+- [x] ErrorPage.vue
 
 ## Tips
 
