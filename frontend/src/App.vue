@@ -25,6 +25,9 @@ onMounted(() => {
 
 // Initialize the idle timer
 const initIdleTimer = () => {
+  // Stop any existing timer first
+  stopIdleTimer()
+  
   // Only start idle timer if user is authenticated
   if (authStore.isAuthenticated) {
     // Use 1 minute timeout with 15 second warning (easier to test but not too quick)
@@ -51,10 +54,15 @@ const initIdleTimer = () => {
     
     idleTimer.start()
     console.log('Idle timer started with 1-minute timeout')
-  } else if (idleTimer) {
-    // Stop the timer if user is not authenticated
+  }
+}
+
+// Stop the idle timer
+const stopIdleTimer = () => {
+  if (idleTimer) {
     idleTimer.stop()
     idleTimer = null
+    console.log('Idle timer stopped')
   }
 }
 
@@ -62,18 +70,14 @@ const initIdleTimer = () => {
 watchEffect(() => {
   if (authStore.isAuthenticated) {
     initIdleTimer()
-  } else if (idleTimer) {
-    idleTimer.stop()
-    idleTimer = null
+  } else {
+    stopIdleTimer()
   }
 })
 
 // Clean up on component unmount
 onBeforeUnmount(() => {
-  if (idleTimer) {
-    idleTimer.stop()
-    idleTimer = null
-  }
+  stopIdleTimer()
 })
 
 onMounted(async () => {
@@ -88,6 +92,8 @@ onMounted(async () => {
       console.error('Failed to authenticate user on app load:', error)
       // Clear invalid authentication state
       authStore.logout('expired')
+      // Ensure idle timer is stopped
+      stopIdleTimer()
       
       // If on a protected route, redirect to login
       const currentRoute = router.currentRoute.value
@@ -101,6 +107,8 @@ onMounted(async () => {
   } else {
     // No token, ensure we're fully logged out
     authStore.logout()
+    // Make sure idle timer is stopped
+    stopIdleTimer()
   }
   
   // Mark initial loading as complete
