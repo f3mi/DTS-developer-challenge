@@ -65,3 +65,23 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## API Integration
+
+The frontend application integrates with the backend API for managing tasks. The integration is handled through the following stores:
+
+### Task Store
+
+The task store (`src/stores/tasks.ts`) provides the following methods for interacting with the API:
+
+- `fetchTasks()` - Fetches all tasks for the authenticated user
+- `getTaskById(id)` - Gets a task by ID, first checking the local state and then fetching from API if needed
+- `createTask(task)` - Creates a new task
+- `updateTask(id, updates)` - Updates an existing task
+- `deleteTask(id)` - Deletes a task
+
+All API requests include the authentication token provided by the Auth Store.
+
+### Authentication Integration
+
+Tasks are associated with the authenticated user. When a user logs in, their tasks are fetched and displayed in the application. Task operations (create, update, delete) require authentication.

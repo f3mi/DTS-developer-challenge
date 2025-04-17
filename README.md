@@ -62,9 +62,8 @@ Caseworkers at HMCTS require a system to manage their daily tasks efficiently. T
 cd backend
 npm install
 cp .env.example .env  # Edit database credentials accordingly
-npx sequelize db:create
-npx sequelize db:migrate
-npx sequelize db:seed:all
+npm run migrations
+npm run seeders
 npm run dev  # Starts the server on localhost:3000 
 ```
 

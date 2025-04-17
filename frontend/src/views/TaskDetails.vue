@@ -5,15 +5,18 @@ import { useTaskStore } from '../stores/tasks'
 import { useThemeStore } from '../stores/theme'
 import AppHeader from '../components/AppHeader.vue'
 import Sidebar from '../components/Sidebar.vue'
+import { useNotificationStore } from '../stores/notification'
 
 const router = useRouter()
 const route = useRoute()
 const taskStore = useTaskStore()
 const themeStore = useThemeStore()
+const notificationStore = useNotificationStore()
 const taskId = computed(() => Number(route.params.id))
 const isEditing = ref(false)
 const isLoading = ref(true)
 const errorMessage = ref('')
+const task = ref<any>(null)
 
 // Form data for editing
 const editForm = ref({
@@ -26,33 +29,27 @@ const editForm = ref({
 // Load task data
 onMounted(async () => {
   try {
-    // Simulate network delay
-    setTimeout(() => {
-      isLoading.value = false
-      
-      const task = taskStore.getTaskById(taskId.value)
-      
-      if (task) {
-        // Initialize edit form with current task data
-        editForm.value = {
-          title: task.title,
-          description: task.description || '',
-          status: task.status,
-          dueDate: task.dueDate
-        }
-      } else {
-        errorMessage.value = 'Task not found'
+    isLoading.value = true
+    const fetchedTask = await taskStore.getTaskById(taskId.value)
+    
+    if (fetchedTask) {
+      task.value = fetchedTask
+      // Initialize edit form with current task data
+      editForm.value = {
+        title: fetchedTask.title,
+        description: fetchedTask.description || '',
+        status: fetchedTask.status,
+        dueDate: fetchedTask.dueDate
       }
-    }, 1000)
+    } else {
+      errorMessage.value = 'Task not found'
+    }
   } catch (error) {
-    isLoading.value = false
+    console.error('Failed to load task:', error)
     errorMessage.value = 'Failed to load task'
+  } finally {
+    isLoading.value = false
   }
-})
-
-// Get the current task
-const task = computed(() => {
-  return taskStore.getTaskById(taskId.value)
 })
 
 // Format date for display
@@ -67,9 +64,9 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-GB', options)
 }
 
-// Navigate back to dashboard
+// Navigate back to tasks
 const goBack = () => {
-  router.push('/dashboard')
+  router.push('/tasks')
 }
 
 // Toggle edit mode
@@ -88,27 +85,45 @@ const toggleEdit = () => {
 }
 
 // Save edited task
-const saveTask = () => {
+const saveTask = async () => {
   if (!editForm.value.title || !editForm.value.dueDate) {
-    alert('Please fill in required fields')
+    notificationStore.error('Please fill in all required fields')
     return
   }
   
-  taskStore.updateTask(taskId.value, {
-    title: editForm.value.title,
-    description: editForm.value.description,
-    status: editForm.value.status,
-    dueDate: editForm.value.dueDate
-  })
-  
-  isEditing.value = false
+  try {
+    isLoading.value = true
+    const updatedTask = await taskStore.updateTask(taskId.value, {
+      title: editForm.value.title,
+      description: editForm.value.description,
+      status: editForm.value.status,
+      dueDate: editForm.value.dueDate
+    })
+    
+    if (updatedTask) {
+      task.value = updatedTask
+      isEditing.value = false
+      notificationStore.success('Task updated successfully')
+    }
+  } catch (error) {
+    console.error('Failed to update task:', error)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 // Delete task
-const deleteTask = () => {
+const deleteTask = async () => {
   if (confirm('Are you sure you want to delete this task?')) {
-    taskStore.deleteTask(taskId.value)
-    router.push('/dashboard')
+    try {
+      isLoading.value = true
+      await taskStore.deleteTask(taskId.value)
+      notificationStore.success('Task deleted successfully')
+      router.push('/tasks')
+    } catch (error) {
+      console.error('Failed to delete task:', error)
+      isLoading.value = false
+    }
   }
 }
 </script>

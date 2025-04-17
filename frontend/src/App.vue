@@ -3,6 +3,7 @@ import { onMounted, ref, watchEffect, onBeforeUnmount } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import { useThemeStore } from './stores/theme'
+import NotificationToast from './components/NotificationToast.vue'
 import IdleTimer from './utils/idleTimer'
 
 const router = useRouter()
@@ -116,6 +117,9 @@ onMounted(async () => {
     </div>
     <!-- Show router view once initial loading is done -->
     <RouterView v-else />
+    
+    <!-- Global notification toast component -->
+    <NotificationToast />
   </div>
 </template>
 

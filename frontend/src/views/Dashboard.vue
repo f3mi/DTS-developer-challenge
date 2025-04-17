@@ -12,6 +12,7 @@ const themeStore = useThemeStore()
 
 // Reactive variables
 const isLoading = ref(true)
+const errorMessage = ref('')
 const activeReport = ref('overview')
 const searchQuery = ref('')
 const dateRange = ref({
@@ -22,11 +23,19 @@ const dateRange = ref({
 // Type definition for the report types
 type ReportType = 'overview' | 'performance' | 'detailed'
 
-// Simulate loading
-onMounted(() => {
-  setTimeout(() => {
+// Fetch tasks on mount
+onMounted(async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+  
+  try {
+    await taskStore.fetchTasks()
+  } catch (error) {
+    console.error('Failed to fetch tasks for dashboard:', error)
+    errorMessage.value = 'Failed to load dashboard data. Please try refreshing the page.'
+  } finally {
     isLoading.value = false
-  }, 800)
+  }
 })
 
 // Computed properties for reports
@@ -138,6 +147,21 @@ function updateDateRange(): void {
 function setActiveReport(reportType: string): void {
   activeReport.value = reportType as ReportType
 }
+
+// Additional function to retry loading
+const retryLoading = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+  
+  try {
+    await taskStore.fetchTasks()
+  } catch (error) {
+    console.error('Failed to fetch tasks for dashboard:', error)
+    errorMessage.value = 'Failed to load dashboard data. Please try refreshing the page.'
+  } finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
@@ -161,6 +185,14 @@ function setActiveReport(reportType: string): void {
           <p class="theme-text-secondary loading-text">Loading reports data...</p>
         </div>
         
+        <!-- Error state -->
+        <div v-else-if="errorMessage" class="error-container">
+          <div class="theme-alert error-message">
+            <p>{{ errorMessage }}</p>
+            <button @click="retryLoading" class="theme-button-primary retry-button">Retry</button>
+          </div>
+        </div>
+        
         <!-- Reports Content -->
         <div v-else class="reports-content">
           <!-- Page header -->
@@ -179,7 +211,7 @@ function setActiveReport(reportType: string): void {
                   @change="updateDateRange"
                   class="theme-input"
                 />
-          </div>
+              </div>
               <div class="date-range">
                 <label for="end-date" class="theme-text-secondary">To:</label>
                 <input 
@@ -216,8 +248,8 @@ function setActiveReport(reportType: string): void {
             >
               Detailed Reports
             </button>
-              </div>
-              
+          </div>
+          
           <!-- Report Section -->
           <div class="report-section">
             <!-- Overview Report -->
@@ -355,9 +387,9 @@ function setActiveReport(reportType: string): void {
                         <polyline points="18 15 12 9 6 15"></polyline>
                       </svg>
                       <span>12% faster than last month</span>
-            </div>
-          </div>
-        </div>
+                    </div>
+                  </div>
+                </div>
         
                 <div class="theme-card metric-card">
                   <h3 class="theme-text-secondary">Tasks Completed</h3>
@@ -370,14 +402,14 @@ function setActiveReport(reportType: string): void {
                     <div class="metric-trend positive">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="18 15 12 9 6 15"></polyline>
-            </svg>
+                      </svg>
                       <span>8% more than previous period</span>
                     </div>
                   </div>
                 </div>
-          </div>
-        </div>
-        
+              </div>
+            </div>
+            
             <!-- Detailed Report -->
             <div v-else-if="activeReport === 'detailed'" class="detailed-report">
               <h2 class="theme-text-primary">Detailed Task Reports</h2>
@@ -414,7 +446,7 @@ function setActiveReport(reportType: string): void {
           </div>
         </div>
       </main>
-      </div>
+    </div>
   </div>
 </template>
 
@@ -828,5 +860,26 @@ function setActiveReport(reportType: string): void {
   .chart-bar {
     width: 30px;
   }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+.error-message {
+  padding: 16px;
+  max-width: 400px;
+  text-align: center;
+  background-color: var(--bg-error);
+  border: 1px solid var(--error-color);
+  border-radius: 4px;
+}
+
+.retry-button {
+  margin-top: 16px;
 }
 </style> 

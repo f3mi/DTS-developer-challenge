@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useTaskStore } from '../stores/tasks'
 import { useAuthStore } from '../stores/auth'
 import { useThemeStore } from '../stores/theme'
+import { useNotificationStore } from '../stores/notification'
 import TaskCard from '../components/TaskCard.vue'
 import AppHeader from '../components/AppHeader.vue'
 import Sidebar from '../components/Sidebar.vue'
@@ -12,10 +13,11 @@ const router = useRouter()
 const taskStore = useTaskStore()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
+const notificationStore = useNotificationStore()
 const searchQuery = ref('')
 const isCreatingTask = ref(false)
 const isLoading = ref(true)
-
+const errorMessage = ref('')
 
 // Filter tasks based on search query
 const filteredTasks = computed(() => {
@@ -34,32 +36,44 @@ const handleSearch = (query: string) => {
 }
 
 // Create a new task
-const createTask = () => {
+const createTask = async () => {
   if (!newTask.value.title || !newTask.value.dueDate) {
-    alert('Please fill in required fields')
+    notificationStore.error('Please fill in all required fields')
     return
   }
   
-  taskStore.createTask({
-    title: newTask.value.title,
-    description: newTask.value.description,
-    status: newTask.value.status as 'pending' | 'in-progress' | 'completed',
-    dueDate: newTask.value.dueDate
-  })
-  
-  resetNewTaskForm()
-  isCreatingTask.value = false
+  try {
+    await taskStore.createTask({
+      title: newTask.value.title,
+      description: newTask.value.description,
+      status: newTask.value.status as 'pending' | 'in-progress' | 'completed',
+      dueDate: newTask.value.dueDate
+    })
+    
+    resetNewTaskForm()
+    isCreatingTask.value = false
+  } catch (error) {
+    console.error('Failed to create task:', error)
+  }
 }
 
 // Update task status
-const updateTaskStatus = (taskId: number, newStatus: 'pending' | 'in-progress' | 'completed') => {
-  taskStore.updateTask(taskId, { status: newStatus })
+const updateTaskStatus = async (taskId: number, newStatus: 'pending' | 'in-progress' | 'completed') => {
+  try {
+    await taskStore.updateTask(taskId, { status: newStatus })
+  } catch (error) {
+    console.error('Failed to update task status:', error)
+  }
 }
 
 // Delete a task
-const deleteTask = (taskId: number) => {
+const deleteTask = async (taskId: number) => {
   if (confirm('Are you sure you want to delete this task?')) {
-    taskStore.deleteTask(taskId)
+    try {
+      await taskStore.deleteTask(taskId)
+    } catch (error) {
+      console.error('Failed to delete task:', error)
+    }
   }
 }
 
@@ -98,17 +112,40 @@ const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString('en-GB', options)
 }
 
-// Simulate loading
-onMounted(() => {
-  setTimeout(() => {
+// Fetch tasks on mount
+onMounted(async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+  
+  try {
+    await taskStore.fetchTasks()
+  } catch (error) {
+    console.error('Failed to fetch tasks:', error)
+    errorMessage.value = 'Failed to load tasks. Please try refreshing the page.'
+  } finally {
     isLoading.value = false
-  }, 1000)
+  }
 })
 
 // Logout function
 const logout = () => {
   authStore.logout()
   router.push('/login')
+}
+
+// Retry loading tasks
+const retryLoading = async () => {
+  isLoading.value = true
+  errorMessage.value = ''
+  
+  try {
+    await taskStore.fetchTasks()
+  } catch (error) {
+    console.error('Failed to fetch tasks:', error)
+    errorMessage.value = 'Failed to load tasks. Please try refreshing the page.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -133,6 +170,14 @@ const logout = () => {
         <div v-if="isLoading" class="loading-container">
           <div class="theme-loader loading-spinner"></div>
           <p class="loading-text theme-text-secondary">Loading your tasks...</p>
+        </div>
+        
+        <!-- Error state -->
+        <div v-else-if="errorMessage" class="error-container">
+          <div class="theme-alert error-message">
+            <p>{{ errorMessage }}</p>
+            <button @click="retryLoading" class="theme-button-primary retry-button">Retry</button>
+          </div>
         </div>
         
         <div v-else class="main-content">
@@ -637,5 +682,26 @@ textarea.form-input {
     flex-direction: column;
     gap: 16px;
   }
+}
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+}
+
+.error-message {
+  padding: 16px;
+  max-width: 400px;
+  text-align: center;
+  background-color: var(--bg-error);
+  border: 1px solid var(--error-color);
+  border-radius: 4px;
+}
+
+.retry-button {
+  margin-top: 16px;
 }
 </style> 
