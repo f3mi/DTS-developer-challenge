@@ -19,16 +19,71 @@ const isCreatingTask = ref(false)
 const isLoading = ref(true)
 const errorMessage = ref('')
 
-// Filter tasks based on search query
+// Pagination
+const currentPage = ref(1)
+const tasksPerPage = ref(9)
+
+// Status filter
+const statusFilter = ref('all')
+const statuses = [
+  { value: 'all', label: 'All Statuses' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'in-progress', label: 'In Progress' },
+  { value: 'completed', label: 'Completed' }
+]
+
+// Filter tasks based on search query and status
 const filteredTasks = computed(() => {
-  if (!searchQuery.value) return taskStore.tasks
+  // First filter by search query
+  let tasks = taskStore.tasks
   
-  const query = searchQuery.value.toLowerCase()
-  return taskStore.tasks.filter(task => 
-    task.title.toLowerCase().includes(query) || 
-    (task.description && task.description.toLowerCase().includes(query))
-  )
+  if (searchQuery.value) {
+    const query = searchQuery.value.toLowerCase()
+    tasks = tasks.filter(task => 
+      task.title.toLowerCase().includes(query) || 
+      (task.description && task.description.toLowerCase().includes(query))
+    )
+  }
+  
+  // Then filter by status if not 'all'
+  if (statusFilter.value !== 'all') {
+    tasks = tasks.filter(task => task.status === statusFilter.value)
+  }
+  
+  return tasks
 })
+
+// Paginated tasks
+const paginatedTasks = computed(() => {
+  const startIndex = (currentPage.value - 1) * tasksPerPage.value
+  const endIndex = startIndex + tasksPerPage.value
+  return filteredTasks.value.slice(startIndex, endIndex)
+})
+
+// Total pages
+const totalPages = computed(() => {
+  return Math.ceil(filteredTasks.value.length / tasksPerPage.value)
+})
+
+// Go to page
+const goToPage = (page: number) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
+// Update status filter
+const updateStatusFilter = (status: string) => {
+  statusFilter.value = status
+  currentPage.value = 1 // Reset to first page when filter changes
+}
+
+// Reset filters
+const resetFilters = () => {
+  statusFilter.value = 'all'
+  searchQuery.value = ''
+  currentPage.value = 1
+}
 
 // Handle search from header
 const handleSearch = (query: string) => {
@@ -199,6 +254,35 @@ const retryLoading = async () => {
             </div>
           </div>
           
+          <!-- Add status filter bar below the page header -->
+          <div class="filters-bar">
+            <div class="status-filters">
+              <span class="filter-label theme-text-secondary">Status:</span>
+              <div class="status-buttons">
+                <button 
+                  v-for="status in statuses" 
+                  :key="status.value"
+                  @click="updateStatusFilter(status.value)"
+                  :class="[
+                    'theme-button-filter', 
+                    statusFilter === status.value ? 'active' : ''
+                  ]"
+                >
+                  {{ status.label }}
+                </button>
+              </div>
+            </div>
+            <div class="filter-actions">
+              <button 
+                v-if="statusFilter !== 'all' || searchQuery" 
+                @click="resetFilters" 
+                class="theme-button-secondary reset-filter-button"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+          
           <!-- Create task form -->
           <div v-if="isCreatingTask" class="create-task-modal">
             <div class="modal-overlay" @click="isCreatingTask = false"></div>
@@ -276,7 +360,7 @@ const retryLoading = async () => {
             </div>
           </div>
           
-          <!-- Task list -->
+          <!-- Task list with pagination -->
           <div class="tasks-container">
             <!-- Empty state -->
             <div v-if="filteredTasks.length === 0" class="empty-state">
@@ -288,64 +372,143 @@ const retryLoading = async () => {
                 </svg>
               </div>
               <h3 class="theme-text-primary">No tasks found</h3>
-              <p class="theme-text-secondary">{{ searchQuery ? 'Try a different search query' : 'Click the "Add Task" button to create your first task' }}</p>
-              <button 
-                v-if="!searchQuery" 
-                class="theme-button-primary create-first-task"
-                @click="isCreatingTask = true"
-              >
-                Create First Task
-              </button>
+              <p class="theme-text-secondary">
+                {{ searchQuery || statusFilter !== 'all' ? 'Try different filters or create a new task' : 'Click the "Add Task" button to create your first task' }}
+              </p>
+              <div class="empty-state-actions">
+                <button 
+                  class="theme-button-primary create-first-task"
+                  @click="isCreatingTask = true"
+                >
+                  Create {{ searchQuery || statusFilter !== 'all' ? 'New' : 'First' }} Task
+                </button>
+                <button 
+                  v-if="searchQuery || statusFilter !== 'all'"
+                  class="theme-button-secondary"
+                  @click="resetFilters"
+                >
+                  Clear Filters
+                </button>
+              </div>
             </div>
             
             <!-- Task cards -->
-            <div v-else class="task-list">
-              <div 
-                v-for="task in filteredTasks" 
-                :key="task.id"
-                class="theme-task-card task-card"
-                @click="viewTaskDetails(task.id)"
-              >
-                <div class="task-header">
-                  <div class="theme-status-pill" :class="task.status">
-                    {{ task.status.replace('-', ' ') }}
+            <div v-else>
+              <div class="task-list">
+                <div 
+                  v-for="task in paginatedTasks" 
+                  :key="task.id"
+                  class="theme-task-card task-card"
+                  @click="viewTaskDetails(task.id)"
+                >
+                  <div class="task-header">
+                    <div class="theme-status-pill" :class="task.status">
+                      {{ task.status.replace('-', ' ') }}
+                    </div>
+                    <div class="task-actions">
+                      <button 
+                        class="task-action-button edit"
+                        @click.stop="viewTaskDetails(task.id)"
+                      >
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667l-8.4 8.4L2 14l.933-3.6 8.4-8.4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                      <button 
+                        class="task-action-button delete"
+                        @click.stop="deleteTask(task.id)"
+                      >
+                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
                   </div>
-                  <div class="task-actions">
-                    <button 
-                      class="task-action-button edit"
-                      @click.stop="viewTaskDetails(task.id)"
-                    >
+                  
+                  <h3 class="task-title theme-text-primary">{{ task.title }}</h3>
+                  
+                  <p v-if="task.description" class="task-description theme-text-secondary truncate-2-lines">
+                    {{ task.description }}
+                  </p>
+                  
+                  <div class="task-meta theme-text-secondary">
+                    <div class="due-date">
                       <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667l-8.4 8.4L2 14l.933-3.6 8.4-8.4z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2.667 6.667h10.666M2.667 3.333h10.666a1.333 1.333 0 0 1 1.334 1.334v8a1.333 1.333 0 0 1-1.334 1.333H2.667a1.333 1.333 0 0 1-1.334-1.333v-8a1.333 1.333 0 0 1 1.334-1.334zM5.333 1.333v4M10.667 1.333v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
-                    </button>
-                    <button 
-                      class="task-action-button delete"
-                      @click.stop="deleteTask(task.id)"
-                    >
-                      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M2 4h12M5.333 4V2.667a1.333 1.333 0 0 1 1.334-1.334h2.666a1.333 1.333 0 0 1 1.334 1.334V4m2 0v9.333a1.333 1.333 0 0 1-1.334 1.334H4.667a1.333 1.333 0 0 1-1.334-1.334V4h9.334z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                
-                <h3 class="task-title theme-text-primary">{{ task.title }}</h3>
-                
-                <p v-if="task.description" class="task-description theme-text-secondary truncate-2-lines">
-                  {{ task.description }}
-                </p>
-                
-                <div class="task-meta theme-text-secondary">
-                  <div class="due-date">
-                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M2.667 6.667h10.666M2.667 3.333h10.666a1.333 1.333 0 0 1 1.334 1.334v8a1.333 1.333 0 0 1-1.334 1.333H2.667a1.333 1.333 0 0 1-1.334-1.333v-8a1.333 1.333 0 0 1 1.334-1.334zM5.333 1.333v4M10.667 1.333v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span>{{ formatDate(task.dueDate) }}</span>
+                      <span>{{ formatDate(task.dueDate) }}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+          
+          <!-- Pagination component -->
+          <div v-if="totalPages > 1" class="pagination">
+            <button 
+              class="theme-button-icon pagination-button"
+              :disabled="currentPage === 1"
+              @click="goToPage(1)"
+              aria-label="First page"
+            >
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 3L6 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M6 3v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            
+            <button 
+              class="theme-button-icon pagination-button"
+              :disabled="currentPage === 1"
+              @click="goToPage(currentPage - 1)"
+              aria-label="Previous page"
+            >
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            
+            <div class="pagination-pages">
+              <button 
+                v-for="page in totalPages" 
+                :key="page" 
+                @click="goToPage(page)"
+                class="pagination-page"
+                :class="{ active: currentPage === page }"
+              >
+                {{ page }}
+              </button>
+            </div>
+            
+            <button 
+              class="theme-button-icon pagination-button"
+              :disabled="currentPage === totalPages"
+              @click="goToPage(currentPage + 1)"
+              aria-label="Next page"
+            >
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            
+            <button 
+              class="theme-button-icon pagination-button"
+              :disabled="currentPage === totalPages"
+              @click="goToPage(totalPages)"
+              aria-label="Last page"
+            >
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M10 3v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="results-info theme-text-secondary">
+            Showing {{ filteredTasks.length > 0 ? (currentPage - 1) * tasksPerPage + 1 : 0 }} - 
+            {{ Math.min(currentPage * tasksPerPage, filteredTasks.length) }} 
+            of {{ filteredTasks.length }} tasks
           </div>
         </div>
       </main>
@@ -703,5 +866,161 @@ textarea.form-input {
 
 .retry-button {
   margin-top: 16px;
+}
+
+/* Filters bar */
+.filters-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.status-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.theme-button-filter {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-button-filter:hover {
+  background-color: var(--hover-bg);
+}
+
+.theme-button-filter.active {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+  border-color: var(--primary-color);
+}
+
+.reset-filter-button {
+  padding: 6px 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 32px;
+  gap: 4px;
+}
+
+.pagination-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: var(--hover-bg);
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.pagination-pages {
+  display: flex;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+.pagination-page {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.pagination-page:hover {
+  background-color: var(--hover-bg);
+}
+
+.pagination-page.active {
+  background-color: var(--primary-color);
+  color: var(--primary-text);
+  border-color: var(--primary-color);
+}
+
+.results-info {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.empty-state-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+@media (max-width: 768px) {
+  .filters-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .pagination-pages {
+    display: none;
+  }
+  
+  .pagination {
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .empty-state-actions {
+    flex-direction: column;
+  }
 }
 </style> 

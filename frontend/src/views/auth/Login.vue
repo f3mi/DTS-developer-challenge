@@ -6,6 +6,7 @@ import { useThemeStore } from '../../stores/theme'
 import AppLogo from '../../components/AppLogo.vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
 const email = ref('')
@@ -18,23 +19,41 @@ const validationErrors = ref({
   password: ''
 })
 
-// Initialization - check if we have a session timeout message
-const queryParams = router.currentRoute.value.query
-const sessionExpired = ref(queryParams.timeout === 'true')
-const timeoutReason = ref(queryParams.reason || null)
-let timeoutMessage = 'Your session has expired. Please log in again.'
+// Determine if we should show the session timeout message
+const checkSessionExpired = () => {
+  // Direct query parameter check (from router navigation)
+  const hasTimeoutParam = route.query.timeout === 'true'
+  const timeoutReason = route.query.reason as string || null
+  
+  // Check if it's an actual logout or timeout (not a first-time login)
+  if (hasTimeoutParam || authStore.sessionTimeoutReason) {
+    return {
+      expired: true,
+      reason: timeoutReason || authStore.sessionTimeoutReason || 'expired',
+      message: getTimeoutMessage(timeoutReason || authStore.sessionTimeoutReason)
+    }
+  }
 
-if (timeoutReason.value === 'idle') {
-  timeoutMessage = 'Your session has timed out due to inactivity. Please log in again.'
-}
-
-// If the authStore has a timeout reason, use that instead
-if (authStore.sessionTimeoutReason) {
-  sessionExpired.value = true
-  if (authStore.sessionTimeoutReason === 'idle') {
-    timeoutMessage = 'Your session has timed out due to inactivity. Please log in again.'
+  return {
+    expired: false,
+    reason: null,
+    message: ''
   }
 }
+
+// Generate appropriate timeout message based on reason
+const getTimeoutMessage = (reason: string | null) => {
+  if (reason === 'idle') {
+    return 'Your session has timed out due to inactivity. Please log in again.'
+  } else if (reason === 'expired') {
+    return 'Your session has expired. Please log in again.'
+  } else {
+    return 'You have been logged out. Please log in again to continue.'
+  }
+}
+
+// Get session expiry state
+const sessionState = computed(() => checkSessionExpired())
 
 // Check for remembered credentials
 onMounted(() => {
@@ -140,10 +159,10 @@ const toggleTheme = () => {
         <div class="form-container">
           <h1 class="login-title theme-text-primary">Log in to your account</h1>
           
-          <!-- Session Expired Message -->
-          <div v-if="sessionExpired" class="timeout-message">
+          <!-- Session Expired Message - only shown when actually expired -->
+          <div v-if="sessionState.expired" class="timeout-message">
             <div class="timeout-icon">⚠️</div>
-            <p class="theme-text-primary">{{ timeoutMessage }}</p>
+            <p class="theme-text-primary">{{ sessionState.message }}</p>
           </div>
           
           <!-- Success Message -->
