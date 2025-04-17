@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { useThemeStore } from '../../stores/theme'
-import logoSrc from '../../assets/logo.svg'
+import AppLogo from '../../components/AppLogo.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -128,7 +128,7 @@ const toggleTheme = () => {
     <div class="theme-card login-container">
       <div class="login-content">
         <div class="logo-container">
-          <img :src="logoSrc" alt="App Logo" class="app-logo" />
+          <AppLogo height="48" maxWidth="200" :centered="true" />
           <div class="theme-toggle">
             <button @click="toggleTheme" class="theme-toggle-button">
               <span v-if="themeStore.isDark" class="theme-icon">🌙</span>
@@ -247,21 +247,17 @@ const toggleTheme = () => {
 }
 
 .logo-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 32px;
   position: relative;
-}
-
-.app-logo {
-  height: 48px;
+  width: 100%;
+  margin-bottom: 32px;
+  text-align: center;
 }
 
 .theme-toggle {
   position: absolute;
   right: 0;
-  top: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .theme-toggle-button {

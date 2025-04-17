@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="60" viewBox="0 0 300 60">
+  <!-- Rounded-square icon background -->
+  <rect x="0" y="0" width="50" height="50" rx="8" fill="#FFFFFF"/>
+  <!-- Checkmark -->
+  <polyline points="14,28 22,36 36,14"
+            fill="none"
+            stroke="#0052CC"
+            stroke-width="4"
+            stroke-linecap="round"
+            stroke-linejoin="round"/>
+  <!-- Wordmark -->
+  <text x="65" y="35"
+        font-family="Segoe UI, Arial, sans-serif"
+        font-size="24"
+        font-weight="600"
+        fill="#FFFFFF">
+    HMCTS
+  </text>
+  <text x="65" y="55"
+        font-family="Segoe UI, Arial, sans-serif"
+        font-size="14"
+        fill="#CCCCCC">
+    Task Manager
+  </text>
+</svg> 

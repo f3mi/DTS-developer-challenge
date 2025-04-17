@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { useThemeStore } from '../../stores/theme'
-import logoSrc from '../../assets/logo.svg'
+import AppLogo from '../../components/AppLogo.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -156,7 +156,7 @@ const toggleTheme = () => {
     <div class="register-container">
       <div class="theme-card register-content">
         <div class="logo-container">
-          <img :src="logoSrc" alt="App Logo" class="app-logo" />
+          <AppLogo height="48" maxWidth="200" :centered="true" />
           <div class="theme-toggle">
             <button @click="toggleTheme" class="theme-toggle-button">
               <span v-if="themeStore.isDark" class="theme-icon">🌙</span>
@@ -310,26 +310,17 @@ const toggleTheme = () => {
 }
 
 .logo-container {
-  text-align: center;
-  margin-bottom: 32px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   position: relative;
-}
-
-.app-logo {
-  width: 200px;
-  height: auto;
-  max-width: 100%;
-  margin: 0 auto;
-  display: block;
+  width: 100%;
+  margin-bottom: 32px;
+  text-align: center;
 }
 
 .theme-toggle {
   position: absolute;
   right: 0;
-  top: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .theme-toggle-button {

@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useThemeStore } from '../stores/theme'
 import ThemeSwitcher from './ThemeSwitcher.vue';
+import AppLogo from './AppLogo.vue';
 
 interface Task {
   id: number;
@@ -27,6 +29,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const searchQuery = ref('');
 const showReminders = ref(false);
+const themeStore = useThemeStore()
 
 // Get user name or email to display
 const userDisplayName = computed(() => {
@@ -84,9 +87,7 @@ const viewTask = (taskId: number) => {
     <div class="header-container">
       <!-- Logo section -->
       <div class="logo-section">
-        <div class="logo">
-          <img src="../assets/logo.svg" alt="HMCTS Task Manager Logo" class="logo-img" />
-        </div>
+        <AppLogo height="30" maxWidth="180" :centered="false" />
       </div>
 
       <!-- Search section - only show on tasks route -->
@@ -174,15 +175,7 @@ const viewTask = (taskId: number) => {
 .logo-section {
   display: flex;
   align-items: center;
-}
-
-.logo {
-  height: 36px;
-}
-
-.logo-img {
-  height: 100%;
-  width: auto;
+  padding: 0 8px;
 }
 
 .search-section {

@@ -1,64 +1,82 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import logoSrc from '../assets/logo.svg'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useThemeStore } from '../stores/theme'
+import AppLogo from '../components/AppLogo.vue'
+import errorIllustration from '../assets/error-illustration.svg'
 
 const router = useRouter()
+const route = useRoute()
+const themeStore = useThemeStore()
 const isLoading = ref(true)
-const dotsCount = ref(3)
+
+// Get error information from the route or use defaults
+const statusCode = computed(() => route.params.code || '404')
+const errorMessage = computed(() => {
+  if (route.query.message) return route.query.message
+  
+  switch (statusCode.value) {
+    case '404':
+      return 'The page you are looking for does not exist or has been moved.'
+    case '403':
+      return 'You do not have permission to access this page.'
+    case '500':
+      return 'Something went wrong on our end. Please try again later.'
+    default:
+      return 'An error occurred. Please try again later.'
+  }
+})
 
 onMounted(() => {
   // Simulate loading for a better UX
   setTimeout(() => {
     isLoading.value = false
   }, 1500)
-  
-  // Animate loading dots
-  const dotsInterval = setInterval(() => {
-    dotsCount.value = (dotsCount.value % 3) + 1
-  }, 500)
-  
-  // Clean up interval
-  return () => clearInterval(dotsInterval)
 })
 
-// Navigate back to dashboard
-function goToDashboard() {
-  router.push('/dashboard')
+// Go back to home or last page
+const goHome = () => {
+  router.push('/')
+}
+
+const goBack = () => {
+  router.go(-1)
 }
 </script>
 
 <template>
-  <div class="error-page">
-    <div v-if="isLoading" class="loading-container">
-      <div class="loading-text">
-        Loading<span v-for="n in dotsCount" :key="n">.</span><span v-for="n in 3-dotsCount" :key="`empty-${n}`" class="invisible-dot">.</span>
-      </div>
+  <div class="theme-view-container error-page">
+    <div v-if="isLoading" class="theme-loading-container loading-container">
+      <div class="theme-loader loading-spinner"></div>
+      <p class="theme-text-secondary loading-text">Loading error details...</p>
     </div>
     
-    <div v-else class="error-content">
+    <div v-else class="error-content theme-card">
       <div class="error-logo">
-        <img :src="logoSrc" alt="App Logo" class="app-logo" />
+        <AppLogo height="50" maxWidth="220" :centered="true" />
       </div>
       
       <div class="error-illustration">
-        <img src="https://cdn.monday.com/images/404_error_page/error-header-img.svg" alt="Error Illustration" />
+        <img :src="errorIllustration" alt="Error Illustration" />
       </div>
       
-      <h1 class="error-title">Oops! Something went wrong</h1>
+      <h1 class="error-title theme-text-primary">Oops! Something went wrong</h1>
       
-      <p class="error-description">
-        We couldn't find the page you're looking for. The page might be temporarily unavailable, moved or no longer exist.
+      <p class="error-description theme-text-secondary">
+        {{ errorMessage }}
       </p>
       
       <div class="error-actions">
-        <button @click="goToDashboard" class="primary-button">
-          Back to Dashboard
+        <button @click="goHome" class="theme-button-primary primary-button">
+          Back to Home
+        </button>
+        <button @click="goBack" class="theme-button-secondary secondary-button">
+          Go Back
         </button>
       </div>
       
       <div class="error-help">
-        <p>Need help? <a href="#" class="help-link">Contact Support</a></p>
+        <p class="theme-text-secondary">Need help? <a href="#" class="theme-link help-link">Contact Support</a></p>
       </div>
     </div>
   </div>
@@ -71,8 +89,7 @@ function goToDashboard() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #f6f7fb;
-  font-family: 'Roboto', sans-serif;
+  background-color: var(--bg-primary);
   padding: 20px;
 }
 
@@ -84,34 +101,29 @@ function goToDashboard() {
   height: 100vh;
 }
 
-.loading-text {
-  font-size: 24px;
-  color: #0073ea;
-  font-weight: 500;
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 16px;
 }
 
-.invisible-dot {
-  opacity: 0;
+.loading-text {
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .error-content {
   max-width: 600px;
   text-align: center;
+  padding: 40px;
+  border-radius: 12px;
 }
 
 .error-logo {
-  width: 220px;
   margin: 0 auto 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.app-logo {
-  width: 100%;
-  height: auto;
-  max-width: 220px;
-  display: block;
 }
 
 .error-illustration {
@@ -125,47 +137,37 @@ function goToDashboard() {
 }
 
 .error-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #323338;
+  font-size: 28px;
+  font-weight: 600;
   margin-bottom: 16px;
 }
 
 .error-description {
   font-size: 16px;
-  color: #676879;
   margin-bottom: 32px;
   line-height: 1.5;
 }
 
 .error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
   margin-bottom: 32px;
 }
 
-.primary-button {
-  background-color: #0073ea;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 12px 24px;
-  font-size: 16px;
+.primary-button, .secondary-button {
+  padding: 10px 20px;
+  font-size: 14px;
   font-weight: 500;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.primary-button:hover {
-  background-color: #0060b9;
 }
 
 .error-help {
   font-size: 14px;
-  color: #676879;
 }
 
 .help-link {
-  color: #0073ea;
-  text-decoration: none;
   font-weight: 500;
 }
 
@@ -174,6 +176,10 @@ function goToDashboard() {
 }
 
 @media (max-width: 480px) {
+  .error-content {
+    padding: 24px;
+  }
+  
   .error-title {
     font-size: 24px;
   }
@@ -184,6 +190,10 @@ function goToDashboard() {
   
   .error-illustration {
     max-width: 220px;
+  }
+  
+  .error-actions {
+    flex-direction: column;
   }
 }
 </style> 
