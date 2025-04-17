@@ -130,7 +130,10 @@ const viewTask = (taskId: number) => {
               <li v-for="task in reminderTasks" :key="task.id" 
                 class="reminder-item"
                 @click="viewTask(task.id)">
-                <div class="reminder-title">{{ task.title }}</div>
+                <div class="reminder-title">
+                  <span v-if="new Date(task.dueDate) < new Date()" class="overdue-indicator">OVERDUE</span>
+                  {{ task.title }}
+                </div>
                 <div class="reminder-due">Due: {{ formatDate(task.dueDate) }}</div>
               </li>
             </ul>
@@ -365,7 +368,19 @@ const viewTask = (taskId: number) => {
 
 .reminder-due {
   font-size: 12px;
-  color: #e2445c;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.overdue-indicator {
+  background-color: var(--error-color);
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 4px;
+  margin-right: 6px;
+  display: inline-block;
 }
 
 @media (max-width: 768px) {

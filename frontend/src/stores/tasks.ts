@@ -107,7 +107,11 @@ export const useTaskStore = defineStore('tasks', () => {
 
     return tasks.value.filter((task) => {
       const dueDate = new Date(task.dueDate)
-      return dueDate >= now && dueDate <= threeDaysFromNow && task.status !== 'completed'
+      // Include both overdue tasks and tasks due soon (not completed)
+      return (
+        (dueDate < now || (dueDate >= now && dueDate <= threeDaysFromNow)) &&
+        task.status !== 'completed'
+      )
     })
   })
 

@@ -38,11 +38,11 @@ const filteredTasks = computed(() => {
   let tasks = taskStore.tasks
   
   if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
+  const query = searchQuery.value.toLowerCase()
     tasks = tasks.filter(task => 
-      task.title.toLowerCase().includes(query) || 
-      (task.description && task.description.toLowerCase().includes(query))
-    )
+    task.title.toLowerCase().includes(query) || 
+    (task.description && task.description.toLowerCase().includes(query))
+  )
   }
   
   // Then filter by status if not 'all'
@@ -99,14 +99,14 @@ const createTask = async () => {
   
   try {
     await taskStore.createTask({
-      title: newTask.value.title,
-      description: newTask.value.description,
-      status: newTask.value.status as 'pending' | 'in-progress' | 'completed',
-      dueDate: newTask.value.dueDate
-    })
-    
-    resetNewTaskForm()
-    isCreatingTask.value = false
+    title: newTask.value.title,
+    description: newTask.value.description,
+    status: newTask.value.status as 'pending' | 'in-progress' | 'completed',
+    dueDate: newTask.value.dueDate
+  })
+  
+  resetNewTaskForm()
+  isCreatingTask.value = false
   } catch (error) {
     console.error('Failed to create task:', error)
   }
@@ -332,44 +332,44 @@ const retryLoading = async () => {
                 
                   <div class="form-group">
                     <label for="dueDate" class="theme-text-secondary">Due Date <span class="required">*</span></label>
-                    <input 
+                  <input 
                     id="dueDate" 
                     type="datetime-local" 
                     v-model="newTask.dueDate"
                       class="theme-input form-input"
                     required
                   />
-                </div>
               </div>
-              
+            </div>
+            
                 <div class="form-actions">
                   <button 
                   class="theme-button-secondary cancel-button" 
                   @click="isCreatingTask = false"
                 >
-                    Cancel
-                  </button>
+                Cancel
+              </button>
                   <button 
                   class="theme-button-primary save-button" 
                   @click="createTask"
                 >
-                    Create Task
-                  </button>
+                Create Task
+              </button>
                 </div>
-              </div>
             </div>
           </div>
-          
+        </div>
+        
           <!-- Task list with pagination -->
           <div class="tasks-container">
             <!-- Empty state -->
-            <div v-if="filteredTasks.length === 0" class="empty-state">
+          <div v-if="filteredTasks.length === 0" class="empty-state">
               <div class="empty-illustration">
                 <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M15 2H9a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                   <path d="M12 11v6M9 14h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+            </svg>
               </div>
               <h3 class="theme-text-primary">No tasks found</h3>
               <p class="theme-text-secondary">
@@ -498,7 +498,7 @@ const retryLoading = async () => {
               @click="goToPage(totalPages)"
               aria-label="Last page"
             >
-              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M5 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <path d="M10 3v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
@@ -509,9 +509,9 @@ const retryLoading = async () => {
             Showing {{ filteredTasks.length > 0 ? (currentPage - 1) * tasksPerPage + 1 : 0 }} - 
             {{ Math.min(currentPage * tasksPerPage, filteredTasks.length) }} 
             of {{ filteredTasks.length }} tasks
-          </div>
         </div>
-      </main>
+      </div>
+    </main>
     </div>
   </div>
 </template>

@@ -448,8 +448,8 @@ const retryLoading = async () => {
         <div v-if="isLoading" class="loading-container">
           <div class="theme-loader loading-spinner"></div>
           <p class="theme-text-secondary loading-text">Loading reports data...</p>
-        </div>
-        
+      </div>
+      
         <!-- Error state -->
         <div v-else-if="errorMessage" class="error-container">
           <div class="theme-alert error-message">
@@ -471,13 +471,13 @@ const retryLoading = async () => {
           <!-- Report Types Navigation -->
           <div class="report-tabs-container">
             <div class="theme-tabs report-tabs">
-              <button 
+          <button 
                 :class="{ 'tab-active': activeReport === 'overview' }"
                 @click="setActiveReport('overview')"
                 class="tab-button"
-              >
+          >
                 Overview
-              </button>
+          </button>
               <button 
                 :class="{ 'tab-active': activeReport === 'performance' }"
                 @click="setActiveReport('performance')"
@@ -600,7 +600,7 @@ const retryLoading = async () => {
                   <div class="date-filter">
                     <div class="date-range">
                       <label for="start-date" class="theme-text-secondary">From:</label>
-                      <input 
+                <input 
                         type="date" 
                         id="start-date" 
                         v-model="dateRange.start" 
@@ -635,7 +635,8 @@ const retryLoading = async () => {
                   </div>
                 </div>
               </div>
-            </div>            
+              </div>
+              
             <!-- Performance Report -->
             <div v-else-if="activeReport === 'performance'" class="performance-report">
               <h2 class="theme-text-primary">Performance Metrics</h2>
@@ -818,16 +819,16 @@ const retryLoading = async () => {
                     <label for="status-filter" class="theme-text-secondary">Status:</label>
                     <select id="status-filter" class="theme-input filter-select" v-model="statusFilter">
                       <option value="all">All Statuses</option>
-                      <option value="completed">Completed</option>
+                    <option value="completed">Completed</option>
                       <option value="in-progress">In Progress</option>
                       <option value="pending">Pending</option>
-                    </select>
+                  </select>
                   </div>
                 </div>
                 
                 <div class="filter-row">
                   <div class="search-filter">
-                    <input 
+                  <input 
                       type="text" 
                       placeholder="Search tasks..." 
                       class="theme-input search-input" 
@@ -849,10 +850,10 @@ const retryLoading = async () => {
                       <option value="title">Title</option>
                       <option value="status">Status</option>
                     </select>
-                  </div>
                 </div>
               </div>
-              
+            </div>
+            
               <div class="theme-card tasks-table-container">
                 <div v-if="filteredDetailedTasks.length === 0" class="no-tasks theme-text-secondary">
                   No tasks found in the selected date range.
@@ -891,30 +892,30 @@ const retryLoading = async () => {
                   
                   <!-- Pagination -->
                   <div class="pagination">
-                    <button 
+              <button 
                       class="theme-button-secondary pagination-btn" 
                       :disabled="currentPage === 1"
                       @click="currentPage--"
-                    >
+              >
                       Previous
-                    </button>
+              </button>
                     <span class="page-info theme-text-secondary">
                       Page {{ currentPage }} of {{ totalPages }}
                     </span>
-                    <button 
+              <button 
                       class="theme-button-secondary pagination-btn" 
                       :disabled="currentPage === totalPages"
                       @click="currentPage++"
-                    >
+              >
                       Next
-                    </button>
-                  </div>
-                </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
-      </main>
+          </div>
+        </div>
+      </div>
+    </main>
     </div>
   </div>
 </template>

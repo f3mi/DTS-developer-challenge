@@ -375,4 +375,22 @@ body {
   border: 4px solid rgba(255, 255, 255, 0.1);
   border-top-color: var(--primary-color);
 }
+
+.notification-content {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding-right: 20px;
+}
+
+.dark .notification-content {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  padding-right: 20px;
+}
 </style>
