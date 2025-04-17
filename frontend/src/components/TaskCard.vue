@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { defineProps, defineEmits } from 'vue';
-
 // Define the task object type
 interface Task {
   id: number;

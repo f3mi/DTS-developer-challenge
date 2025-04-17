@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import logoSrc from '../../assets/logo.svg'
@@ -10,20 +10,106 @@ const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
 const rememberMe = ref(false)
+const loginSuccess = ref(false)
+const validationErrors = ref({
+  email: '',
+  password: ''
+})
+
+// Initialization - check if we have a session timeout message
+const queryParams = router.currentRoute.value.query
+const sessionExpired = ref(queryParams.timeout === 'true')
+const timeoutReason = ref(queryParams.reason || null)
+let timeoutMessage = 'Your session has expired. Please log in again.'
+
+if (timeoutReason.value === 'idle') {
+  timeoutMessage = 'Your session has timed out due to inactivity. Please log in again.'
+}
+
+// If the authStore has a timeout reason, use that instead
+if (authStore.sessionTimeoutReason) {
+  sessionExpired.value = true
+  if (authStore.sessionTimeoutReason === 'idle') {
+    timeoutMessage = 'Your session has timed out due to inactivity. Please log in again.'
+  }
+}
+
+// Check for remembered credentials
+onMounted(() => {
+  // Initialize remember me from stored value
+  rememberMe.value = Boolean(localStorage.getItem('rememberMe'))
+})
+
+// Computed properties for validation
+const isEmailValid = computed(() => {
+  if (!email.value) return true
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email.value)
+})
+
+// Validation functions
+const validateEmail = () => {
+  if (!email.value.trim()) {
+    validationErrors.value.email = 'Email is required'
+    return false
+  }
+  if (!isEmailValid.value) {
+    validationErrors.value.email = 'Please enter a valid email address'
+    return false
+  }
+  validationErrors.value.email = ''
+  return true
+}
+
+const validatePassword = () => {
+  if (!password.value) {
+    validationErrors.value.password = 'Password is required'
+    return false
+  }
+  validationErrors.value.password = ''
+  return true
+}
+
+// Form validation
+const validateForm = () => {
+  const emailValid = validateEmail()
+  const passwordValid = validatePassword()
+  
+  return emailValid && passwordValid
+}
 
 const login = async () => {
-  if (!email.value || !password.value) {
-    authStore.authError = 'Please enter both email and password'
+  // Reset error and success state
+  authStore.authError = ''
+  loginSuccess.value = false
+  
+  // Validate form
+  if (!validateForm()) {
     return
   }
   
   try {
     isLoading.value = true
-    await authStore.login(email.value, password.value)
-    router.push('/dashboard')
+    // Pass the remember me setting to the login method
+    const userData = await authStore.login(email.value, password.value, rememberMe.value)
+    
+    // Show success message
+    loginSuccess.value = true
+    
+    // Clear form
+    email.value = ''
+    password.value = ''
+    
+    // Get the redirect path from the query parameters if present
+    const redirectPath = router.currentRoute.value.query.redirect || '/dashboard'
+    
+    // Redirect after a delay for user to see success message
+    setTimeout(() => {
+      router.push(redirectPath.toString())
+    }, 1500)
   } catch (error) {
-    isLoading.value = false
     // Error is already set in the store
+    console.error('Login error:', error)
   } finally {
     isLoading.value = false
   }
@@ -39,51 +125,70 @@ const login = async () => {
         </div>
         
         <div class="form-container">
-          <h1 class="login-title">Log in</h1>
+          <h1 class="login-title">Log in to your account</h1>
           
+          <!-- Session Expired Message -->
+          <div v-if="sessionExpired" class="timeout-message">
+            <div class="timeout-icon">⚠️</div>
+            <p>{{ timeoutMessage }}</p>
+          </div>
+          
+          <!-- Success Message -->
+          <div v-if="loginSuccess" class="success-message">
+            <div class="success-icon">✓</div>
+            <div class="success-text">
+              <h3>Login Successful!</h3>
+              <p>Redirecting to your dashboard...</p>
+            </div>
+          </div>
+          
+          <!-- Server Error -->
           <div v-if="authStore.authError" class="error-message">
             {{ authStore.authError }}
           </div>
           
-          <form @submit.prevent="login" class="login-form">
-            <div class="form-group">
+          <form @submit.prevent="login" class="login-form" v-if="!loginSuccess">
+            <div class="form-group" :class="{ 'has-error': validationErrors.email }">
               <input 
                 id="email" 
                 type="email" 
                 v-model="email" 
                 class="form-input" 
                 placeholder="Work email"
+                @blur="validateEmail"
                 required
               />
+              <div v-if="validationErrors.email" class="validation-error">
+                {{ validationErrors.email }}
+              </div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': validationErrors.password }">
               <input 
                 id="password" 
                 type="password" 
                 v-model="password" 
                 class="form-input" 
                 placeholder="Password"
+                @blur="validatePassword"
                 required
               />
+              <div v-if="validationErrors.password" class="validation-error">
+                {{ validationErrors.password }}
+              </div>
             </div>
             
-            <div class="remember-forgot">
-              <div class="remember-me">
+            <div class="options-container">
+              <label class="remember-wrapper">
                 <input 
-                  id="remember-me" 
                   type="checkbox" 
                   v-model="rememberMe"
                   class="remember-checkbox"
                 />
-                <label for="remember-me" class="remember-label">
-                  Remember me
-                </label>
-              </div>
+                <span class="remember-text">Remember me</span>
+              </label>
               
-              <a href="#" class="forgot-password">
-                Forgot your password?
-              </a>
+              <a href="#" class="forgot-link">Forgot your password?</a>
             </div>
             
             <button 
@@ -99,7 +204,8 @@ const login = async () => {
               <span>Or</span>
             </div>
 
-            <div class="social-buttons">
+            <!-- Social buttons not needed for now -->
+            <!-- <div class="social-buttons">
               <button type="button" class="social-button google">
                 <svg width="18" height="18" viewBox="0 0 48 48">
                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
@@ -119,14 +225,14 @@ const login = async () => {
                 </svg>
                 <span>Continue with Microsoft</span>
               </button>
-            </div>
+            </div> -->
           </form>
         </div>
         
-        <div class="signup-section">
+        <div class="register-section" v-if="!loginSuccess">
           <p>
-            Don't have an account yet? 
-            <router-link to="/register" class="signup-link">Sign up</router-link>
+            Don't have an account? 
+            <router-link to="/register" class="register-link">Sign up</router-link>
           </p>
         </div>
       </div>
@@ -137,150 +243,135 @@ const login = async () => {
 <style scoped>
 .login-page {
   display: flex;
-  min-height: 100vh;
   justify-content: center;
   align-items: center;
-  background-color: #f6f7fb;
-  font-family: 'Roboto', sans-serif;
+  min-height: 100vh;
+  background-color: #f5f5f5;
 }
 
 .login-container {
   width: 100%;
   max-width: 480px;
-  margin: 40px auto;
-  padding: 0 20px;
+  margin: 0 auto;
+  padding: 24px;
 }
 
 .login-content {
-  background-color: white;
+  background-color: #fff;
   border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  padding: 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 32px;
 }
 
 .logo-container {
-  text-align: center;
-  margin-bottom: 32px;
   display: flex;
   justify-content: center;
-  align-items: center;
-}
-
-.app-logo {
-  width: 200px;
-  height: auto;
-  max-width: 100%;
-  margin: 0 auto;
-  display: block;
-}
-
-.login-title {
-  font-size: 32px;
-  font-weight: 500;
-  color: #323338;
-  margin-bottom: 32px;
-  text-align: center;
-}
-
-.form-container {
   margin-bottom: 24px;
 }
 
+.app-logo {
+  height: 40px;
+}
+
+.login-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.error-message {
+  background-color: #ffebee;
+  color: #f44336;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
 .login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .form-group {
-  position: relative;
+  margin-bottom: 16px;
 }
 
 .form-input {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #c3c6d4;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: all 0.2s;
-  outline: none;
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  transition: border-color 0.3s;
 }
 
 .form-input:focus {
-  border-color: #0073ea;
-  box-shadow: 0 0 0 2px rgba(0, 115, 234, 0.2);
+  border-color: #1976d2;
+  outline: none;
 }
 
-.form-input::placeholder {
-  color: #b2b2b2;
-}
-
-.remember-forgot {
+.options-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
-.remember-me {
+.remember-wrapper {
   display: flex;
   align-items: center;
+  cursor: pointer;
 }
 
 .remember-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: #0073ea;
+  margin-right: 8px;
 }
 
-.remember-label {
-  margin-left: 8px;
+.remember-text {
   font-size: 14px;
-  color: #676879;
 }
 
-.forgot-password {
+.forgot-link {
   font-size: 14px;
-  color: #0073ea;
+  color: #1976d2;
   text-decoration: none;
 }
 
-.forgot-password:hover {
+.forgot-link:hover {
   text-decoration: underline;
 }
 
 .login-button {
-  background-color: #0073ea;
+  width: 100%;
+  padding: 12px;
+  background-color: #1976d2;
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 12px 24px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 48px;
+  transition: background-color 0.3s;
+  position: relative;
 }
 
 .login-button:hover {
-  background-color: #0060c0;
+  background-color: #1565c0;
 }
 
 .login-button:disabled {
-  background-color: #c3c6d4;
+  background-color: #90caf9;
   cursor: not-allowed;
 }
 
 .button-spinner {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
-  border-top-color: white;
+  border-top-color: #fff;
   animation: spin 1s ease-in-out infinite;
 }
 
@@ -292,19 +383,19 @@ const login = async () => {
   display: flex;
   align-items: center;
   margin: 24px 0;
-  color: #676879;
-  font-size: 14px;
 }
 
 .divider::before,
 .divider::after {
   content: "";
   flex: 1;
-  border-bottom: 1px solid #e1e1e1;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .divider span {
-  margin: 0 12px;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #757575;
 }
 
 .social-buttons {
@@ -319,48 +410,103 @@ const login = async () => {
   justify-content: center;
   width: 100%;
   padding: 12px;
-  background-color: white;
-  border: 1px solid #c3c6d4;
+  border: 1px solid #e0e0e0;
   border-radius: 4px;
+  background-color: white;
   font-size: 14px;
   font-weight: 500;
-  color: #323338;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.3s;
 }
 
 .social-button svg {
-  margin-right: 12px;
+  margin-right: 8px;
 }
 
 .social-button:hover {
-  background-color: #f6f7fb;
+  background-color: #f5f5f5;
 }
 
-.signup-section {
+.register-section {
   text-align: center;
   margin-top: 24px;
   font-size: 14px;
-  color: #676879;
 }
 
-.signup-link {
-  color: #0073ea;
+.register-link {
+  color: #1976d2;
   text-decoration: none;
   font-weight: 500;
 }
 
-.signup-link:hover {
+.register-link:hover {
   text-decoration: underline;
 }
 
-.error-message {
-  padding: 12px;
-  background-color: #ffebe9;
-  border: 1px solid #ffc7c7;
+.validation-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.has-error .form-input {
+  border-color: #f44336;
+}
+
+.success-message {
+  background-color: #e6f7ed;
+  border: 1px solid #b7e6cd;
   border-radius: 4px;
-  color: #d83a52;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.success-icon {
+  width: 30px;
+  height: 30px;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 16px;
+}
+
+.success-text h3 {
+  margin: 0 0 4px;
+  color: #2e7d32;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.success-text p {
+  margin: 0;
+  color: #388e3c;
   font-size: 14px;
-  margin-bottom: 16px;
+}
+
+.timeout-message {
+  background-color: #fff8e1;
+  border-left: 4px solid #ffc107;
+  padding: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+}
+
+.timeout-icon {
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+.timeout-message p {
+  margin: 0;
+  color: #5d4037;
 }
 </style>

@@ -7,24 +7,66 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
+# Dependencies
+node_modules/
+jspm_packages/
 
+# Build
+dist/
+dist-ssr/
+*.local
+out/
+build/
+
+# Testing
+coverage/
 /cypress/videos/
 /cypress/screenshots/
+e2e-results/
+.coverage/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
+# TypeScript
 *.tsbuildinfo
+
+# Vite
+.vite/
+
+# Cache and temporary files
+.temp/
+.cache/
+.eslintcache
+.stylelintcache
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Generated files
+stats.html
+bundle-stats.json
+.vercel
+.netlify/
+storybook-static/
+
+# PWA
+dev-dist/
+sw.js
+workbox-*.js

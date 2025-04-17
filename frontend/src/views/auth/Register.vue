@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import logoSrc from '../../assets/logo.svg'
@@ -12,34 +12,132 @@ const password = ref('')
 const confirmPassword = ref('')
 const isLoading = ref(false)
 const agreeToTerms = ref(false)
+const registerSuccess = ref(false)
+const validationErrors = ref({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  terms: ''
+})
+
+// Computed properties for validation
+const isEmailValid = computed(() => {
+  if (!email.value) return true
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(email.value)
+})
+
+const isPasswordValid = computed(() => {
+  if (!password.value) return true
+  return password.value.length >= 8
+})
+
+const doPasswordsMatch = computed(() => {
+  if (!confirmPassword.value) return true
+  return password.value === confirmPassword.value
+})
+
+// Validation functions
+const validateName = () => {
+  if (!name.value.trim()) {
+    validationErrors.value.name = 'Name is required'
+    return false
+  }
+  validationErrors.value.name = ''
+  return true
+}
+
+const validateEmail = () => {
+  if (!email.value.trim()) {
+    validationErrors.value.email = 'Email is required'
+    return false
+  }
+  if (!isEmailValid.value) {
+    validationErrors.value.email = 'Please enter a valid email address'
+    return false
+  }
+  validationErrors.value.email = ''
+  return true
+}
+
+const validatePassword = () => {
+  if (!password.value) {
+    validationErrors.value.password = 'Password is required'
+    return false
+  }
+  if (!isPasswordValid.value) {
+    validationErrors.value.password = 'Password must be at least 8 characters'
+    return false
+  }
+  validationErrors.value.password = ''
+  return true
+}
+
+const validateConfirmPassword = () => {
+  if (!confirmPassword.value) {
+    validationErrors.value.confirmPassword = 'Please confirm your password'
+    return false
+  }
+  if (!doPasswordsMatch.value) {
+    validationErrors.value.confirmPassword = 'Passwords do not match'
+    return false
+  }
+  validationErrors.value.confirmPassword = ''
+  return true
+}
+
+const validateTerms = () => {
+  if (!agreeToTerms.value) {
+    validationErrors.value.terms = 'You must agree to the terms and conditions'
+    return false
+  }
+  validationErrors.value.terms = ''
+  return true
+}
+
+// Form validation
+const validateForm = () => {
+  const nameValid = validateName()
+  const emailValid = validateEmail()
+  const passwordValid = validatePassword()
+  const confirmPasswordValid = validateConfirmPassword()
+  const termsValid = validateTerms()
+  
+  return nameValid && emailValid && passwordValid && confirmPasswordValid && termsValid
+}
 
 const register = async () => {
-  // Reset error
+  // Reset
   authStore.authError = ''
-
-  // Form validation
-  if (!name.value || !email.value || !password.value || !confirmPassword.value) {
-    authStore.authError = 'Please fill in all fields'
-    return
-  }
+  registerSuccess.value = false
   
-  if (password.value !== confirmPassword.value) {
-    authStore.authError = 'Passwords do not match'
-    return
-  }
-
-  if (!agreeToTerms.value) {
-    authStore.authError = 'Please agree to the terms and conditions'
+  // Validate form
+  if (!validateForm()) {
     return
   }
   
   try {
     isLoading.value = true
     await authStore.register(name.value, email.value, password.value)
-    router.push('/login')
+    
+    // Show success message
+    registerSuccess.value = true
+    
+    // Clear form
+    name.value = ''
+    email.value = ''
+    password.value = ''
+    confirmPassword.value = ''
+    agreeToTerms.value = false
+    
+    // Redirect after a delay for user to see success message
+    setTimeout(() => {
+      router.push('/login')
+    }, 2000)
   } catch (error) {
-    isLoading.value = false
     // Error is already set in the store
+    console.error('Registration error:', error)
   } finally {
     isLoading.value = false
   }
@@ -57,61 +155,88 @@ const register = async () => {
         <div class="form-container">
           <h1 class="register-title">Sign up for free</h1>
           
+          <!-- Success Message -->
+          <div v-if="registerSuccess" class="success-message">
+            <div class="success-icon">✓</div>
+            <div class="success-text">
+              <h3>Registration Successful!</h3>
+              <p>Redirecting you to login...</p>
+            </div>
+          </div>
+          
+          <!-- Server Error -->
           <div v-if="authStore.authError" class="error-message">
             {{ authStore.authError }}
           </div>
           
-          <form @submit.prevent="register" class="register-form">
-            <div class="form-group">
+          <form @submit.prevent="register" class="register-form" v-if="!registerSuccess">
+            <div class="form-group" :class="{ 'has-error': validationErrors.name }">
               <input 
                 id="name" 
                 type="text" 
                 v-model="name" 
                 class="form-input" 
                 placeholder="Full name"
+                @blur="validateName"
                 required
               />
+              <div v-if="validationErrors.name" class="validation-error">
+                {{ validationErrors.name }}
+              </div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': validationErrors.email }">
               <input 
                 id="email" 
                 type="email" 
                 v-model="email" 
                 class="form-input" 
                 placeholder="Work email"
+                @blur="validateEmail"
                 required
               />
+              <div v-if="validationErrors.email" class="validation-error">
+                {{ validationErrors.email }}
+              </div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': validationErrors.password }">
               <input 
                 id="password" 
                 type="password" 
                 v-model="password" 
                 class="form-input" 
                 placeholder="Password (8+ characters)"
+                @blur="validatePassword"
                 required
               />
+              <div v-if="validationErrors.password" class="validation-error">
+                {{ validationErrors.password }}
+              </div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" :class="{ 'has-error': validationErrors.confirmPassword }">
               <input 
                 id="confirm-password" 
                 type="password" 
                 v-model="confirmPassword" 
                 class="form-input" 
                 placeholder="Confirm password"
+                @blur="validateConfirmPassword"
                 required
               />
+              <div v-if="validationErrors.confirmPassword" class="validation-error">
+                {{ validationErrors.confirmPassword }}
+              </div>
             </div>
             
-            <div class="terms-container">
+            <div class="terms-container" :class="{ 'has-error': validationErrors.terms }">
               <label class="terms-wrapper">
               <input 
                 type="checkbox" 
                 v-model="agreeToTerms"
                 class="terms-checkbox"
+                @change="validateTerms"
               />
                 <span class="terms-text">
                   I agree to the 
@@ -120,6 +245,9 @@ const register = async () => {
                   <a href="#" class="terms-link">Privacy Policy</a>
                 </span>
               </label>
+              <div v-if="validationErrors.terms" class="validation-error terms-error">
+                {{ validationErrors.terms }}
+              </div>
             </div>
             
             <button 
@@ -135,7 +263,8 @@ const register = async () => {
               <span>Or</span>
             </div>
 
-              <div class="social-buttons">
+            <!-- Social buttons not needed for now -->
+            <!-- <div class="social-buttons">
               <button type="button" class="social-button google">
                 <svg width="18" height="18" viewBox="0 0 48 48">
                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
@@ -155,7 +284,7 @@ const register = async () => {
                   </svg>
                 <span>Continue with Microsoft</span>
                 </button>
-            </div>
+            </div> -->
           </form>
         </div>
         
@@ -398,5 +527,56 @@ const register = async () => {
   color: #d83a52;
   font-size: 14px;
   margin-bottom: 16px;
+}
+
+.validation-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.terms-error {
+  margin-left: 24px;
+}
+
+.has-error .form-input {
+  border-color: #f44336;
+}
+
+.success-message {
+  background-color: #e6f7ed;
+  border: 1px solid #b7e6cd;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.success-icon {
+  width: 30px;
+  height: 30px;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 16px;
+}
+
+.success-text h3 {
+  margin: 0 0 4px;
+  color: #2e7d32;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.success-text p {
+  margin: 0;
+  color: #388e3c;
+  font-size: 14px;
 }
 </style> 

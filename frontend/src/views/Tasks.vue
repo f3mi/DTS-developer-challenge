@@ -259,7 +259,6 @@ const logout = () => {
 
 <style scoped>
 
-
 .loading-container {
   display: flex;
   flex-direction: column;

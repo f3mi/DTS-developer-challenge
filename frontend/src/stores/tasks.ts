@@ -34,6 +34,25 @@ export const useTaskStore = defineStore('tasks', () => {
     },
   ])
 
+  // Loading state
+  const isLoading = ref(false)
+
+  // Fetch tasks (simulated API call)
+  const fetchTasks = async () => {
+    isLoading.value = true
+    try {
+      // Simulate API delay
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      // Data is already loaded in the ref above
+      return tasks.value
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
+      throw error
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   // Get a task by ID
   const getTaskById = (id: number) => {
     return tasks.value.find((task) => task.id === id) || null
@@ -81,6 +100,8 @@ export const useTaskStore = defineStore('tasks', () => {
 
   return {
     tasks,
+    isLoading,
+    fetchTasks,
     getTaskById,
     tasksDueSoon,
     createTask,
