@@ -7,25 +7,17 @@ import { useThemeStore } from '../stores/theme'
 const router = useRouter()
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
-const activeView = ref('my-tasks')
 const showLogoutConfirm = ref(false)
 const logoutSuccess = ref(false)
 
-// Get user name or email to display
-const userDisplayName = computed(() => {
-  if (!authStore.user) return 'User'
-  return authStore.user.name || authStore.user.email.split('@')[0]
-})
-
-// Computed property to get user initials
-const userInitials = computed(() => {
-  if (!authStore.user || !authStore.user.name) return '?'
-  
-  const nameParts = authStore.user.name.split(' ')
-  if (nameParts.length >= 2) {
-    return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`.toUpperCase()
-  }
-  return nameParts[0].charAt(0).toUpperCase()
+// Calculate the active route
+const currentRoute = computed(() => {
+  const path = router.currentRoute.value.path
+  if (path.startsWith('/dashboard')) return 'dashboard'
+  if (path.startsWith('/tasks')) return 'my-tasks'
+  if (path.startsWith('/calender')) return 'calendar'
+  if (path.startsWith('/reports')) return 'reports'
+  return ''
 })
 
 // Show logout confirmation dialog
@@ -61,20 +53,11 @@ const toggleTheme = () => {
 
 <template>
   <aside class="theme-sidebar dashboard-sidebar">
-    <!-- User Profile Section -->
-    <div class="user-profile">
-      <div class="user-avatar theme-avatar">{{ userInitials }}</div>
-      <div class="user-info">
-        <div class="user-name theme-text-primary">{{ userDisplayName }}</div>
-        <div class="user-role theme-text-secondary">{{ authStore.user?.role || 'User' }}</div>
-      </div>
-    </div>
-
     <div class="sidebar-section">
       <h3 class="sidebar-title theme-text-secondary">Workspace</h3>
       <ul class="sidebar-menu">
         <router-link to="/dashboard">
-          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': activeView === 'dashboard' }" @click="activeView = 'dashboard'">
+          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': currentRoute === 'dashboard' }">
             <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M7 10.5h6M5 6.5h10M9 14.5h2M4 4h12c.5523 0 1 .44772 1 1v10c0 .5523-.4477 1-1 1H4c-.55228 0-1-.4477-1-1V5c0-.55228.44772-1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -83,7 +66,7 @@ const toggleTheme = () => {
         </router-link>
 
         <router-link to="/tasks">
-          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': activeView === 'my-tasks' }" @click="activeView = 'my-tasks'">
+          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': currentRoute === 'my-tasks' }">
             <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M7.5 5.5h8M7.5 9.5h5M7.5 13.5h8M4.5 5.5v0M4.5 9.5v0M4.5 13.5v0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -92,7 +75,7 @@ const toggleTheme = () => {
         </router-link>
 
         <router-link to="/calender">
-          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': activeView === 'calendar' }" @click="activeView = 'calendar'">
+          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': currentRoute === 'calendar' }">
             <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 5V3M14 5V3M3 7h14M4 4h12c.5523 0 1 .44772 1 1v12c0 .5523-.4477 1-1 1H4c-.55228 0-1-.4477-1-1V5c0-.55228.44772-1 1-1Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -101,7 +84,7 @@ const toggleTheme = () => {
         </router-link>
 
         <router-link to="/reports">
-          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': activeView === 'reports' }" @click="activeView = 'reports'">
+          <li class="sidebar-menu-item theme-nav-item" :class="{ 'theme-nav-active': currentRoute === 'reports' }">
             <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M16 16V8M12 16V4M8 16v-5M4 16v-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -190,42 +173,6 @@ const toggleTheme = () => {
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-}
-
-.user-profile {
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  margin-right: 12px;
-}
-
-.user-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.user-name {
-  font-weight: 500;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.user-role {
-  font-size: 12px;
-  text-transform: capitalize;
 }
 
 .sidebar-section {

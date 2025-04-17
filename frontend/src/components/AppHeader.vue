@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 import ThemeSwitcher from './ThemeSwitcher.vue';
 
 interface Task {
@@ -21,8 +23,32 @@ const emit = defineEmits<{
   (e: 'logout'): void;
 }>();
 
+const router = useRouter();
+const authStore = useAuthStore();
 const searchQuery = ref('');
 const showReminders = ref(false);
+
+// Get user name or email to display
+const userDisplayName = computed(() => {
+  if (!authStore.user) return 'User';
+  return authStore.user.name || authStore.user.email.split('@')[0];
+});
+
+// Computed property to get user initials
+const userInitials = computed(() => {
+  if (!authStore.user || !authStore.user.name) return '?';
+  
+  const nameParts = authStore.user.name.split(' ');
+  if (nameParts.length >= 2) {
+    return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`.toUpperCase();
+  }
+  return nameParts[0].charAt(0).toUpperCase();
+});
+
+// Computed property to check if we're on the tasks route
+const isTasksRoute = computed(() => {
+  return router.currentRoute.value.path === '/tasks';
+});
 
 // Send search query to parent
 const onSearch = () => {
@@ -63,8 +89,8 @@ const viewTask = (taskId: number) => {
         </div>
       </div>
 
-      <!-- Search section -->
-      <div class="search-section">
+      <!-- Search section - only show on tasks route -->
+      <div class="search-section" v-if="isTasksRoute">
         <div class="search-wrapper">
           <svg class="search-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M8.5 3C11.5376 3 14 5.46243 14 8.5C14 9.83879 13.5217 11.0659 12.7266 12.0196L16.8536 16.1464C17.0488 16.3417 17.0488 16.6583 16.8536 16.8536C16.68 17.0271 16.4106 17.0464 16.2157 16.9114L16.1464 16.8536L12.0196 12.7266C11.0659 13.5217 9.83879 14 8.5 14C5.46243 14 3 11.5376 3 8.5C3 5.46243 5.46243 3 8.5 3ZM8.5 4C6.01472 4 4 6.01472 4 8.5C4 10.9853 6.01472 13 8.5 13C10.9853 13 13 10.9853 13 8.5C13 6.01472 10.9853 4 8.5 4Z" fill="currentColor"/>
@@ -110,11 +136,15 @@ const viewTask = (taskId: number) => {
           </div>
         </button>
         
-        <button class="user-button" @click="onLogout">
-          <div class="user-avatar">
-            <span>U</span>
-          </div>
-        </button>
+        <!-- User information with logout button -->
+        <div class="user-info">
+          <div class="user-name">{{ userDisplayName }}</div>
+          <button class="user-button" @click="onLogout">
+            <div class="user-avatar">
+              <span>{{ userInitials }}</span>
+            </div>
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -247,6 +277,22 @@ const viewTask = (taskId: number) => {
   padding: 0 4px;
 }
 
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
 .user-button {
   width: 40px;
   height: 40px;
@@ -340,6 +386,10 @@ const viewTask = (taskId: number) => {
   
   .product-name {
     display: none;
+  }
+  
+  .user-name {
+    max-width: 100px;
   }
 }
 </style> 

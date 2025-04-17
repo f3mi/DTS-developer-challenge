@@ -121,8 +121,8 @@ const weeklyCompletionData = computed(() => {
 // Utility functions
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
+    year: 'numeric', 
+    month: 'short', 
     day: 'numeric'
   })
 }
@@ -160,7 +160,7 @@ function setActiveReport(reportType: string): void {
           <div class="theme-loader loading-spinner"></div>
           <p class="theme-text-secondary loading-text">Loading reports data...</p>
         </div>
-  
+        
         <!-- Reports Content -->
         <div v-else class="reports-content">
           <!-- Page header -->
@@ -179,7 +179,7 @@ function setActiveReport(reportType: string): void {
                   @change="updateDateRange"
                   class="theme-input"
                 />
-              </div>
+          </div>
               <div class="date-range">
                 <label for="end-date" class="theme-text-secondary">To:</label>
                 <input 
@@ -216,8 +216,8 @@ function setActiveReport(reportType: string): void {
             >
               Detailed Reports
             </button>
-          </div>
-  
+              </div>
+              
           <!-- Report Section -->
           <div class="report-section">
             <!-- Overview Report -->
@@ -355,10 +355,10 @@ function setActiveReport(reportType: string): void {
                         <polyline points="18 15 12 9 6 15"></polyline>
                       </svg>
                       <span>12% faster than last month</span>
-                    </div>
-                  </div>
-                </div>
-                
+            </div>
+          </div>
+        </div>
+        
                 <div class="theme-card metric-card">
                   <h3 class="theme-text-secondary">Tasks Completed</h3>
                   <div class="metric-chart">
@@ -370,14 +370,14 @@ function setActiveReport(reportType: string): void {
                     <div class="metric-trend positive">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="18 15 12 9 6 15"></polyline>
-                      </svg>
+            </svg>
                       <span>8% more than previous period</span>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            
+          </div>
+        </div>
+        
             <!-- Detailed Report -->
             <div v-else-if="activeReport === 'detailed'" class="detailed-report">
               <h2 class="theme-text-primary">Detailed Task Reports</h2>
@@ -414,7 +414,7 @@ function setActiveReport(reportType: string): void {
           </div>
         </div>
       </main>
-    </div>
+      </div>
   </div>
 </template>
 
