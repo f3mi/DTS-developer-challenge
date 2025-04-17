@@ -1,0 +1,64 @@
+# Node.js specific
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Environment files - but keep examples
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.*.example
+
+# Build directories
+dist/
+build/
+coverage/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Logs
+logs/
+*.log
+
+# Tests
+coverage/
+.nyc_output/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.code-workspace
+
+# Temporary files
+tmp/
+temp/
+
+# Dependencies lock files
+# Uncomment if you prefer not to commit lock files
+# package-lock.json
+# yarn.lock
+
+# Debugging
+.node-inspect/
+debug.log
+
+# Sequelize
+.sequelizerc
+
+# Uploads
+uploads/
+public/uploads/ 

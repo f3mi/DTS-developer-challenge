@@ -2,10 +2,14 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useTaskStore } from '../stores/tasks'
+import { useThemeStore } from '../stores/theme'
+import AppHeader from '../components/AppHeader.vue'
+import Sidebar from '../components/Sidebar.vue'
 
 const router = useRouter()
 const route = useRoute()
 const taskStore = useTaskStore()
+const themeStore = useThemeStore()
 const taskId = computed(() => Number(route.params.id))
 const isEditing = ref(false)
 const isLoading = ref(true)
@@ -110,158 +114,145 @@ const deleteTask = () => {
 </script>
 
 <template>
-  <div class="task-details-container">
+  <div class="theme-view-container task-details-container">
     <!-- Header section -->
-    <header class="header">
-      <div class="logo">
-        <h1>HMCTS Task Manager</h1>
-      </div>
-    </header>
+    <AppHeader 
+      :reminderCount="taskStore.tasksDueSoon.length"
+      :reminderTasks="taskStore.tasksDueSoon"
+    />
     
-    <!-- Main content -->
-    <main class="main-content">
-      <!-- Loading state -->
-      <div v-if="isLoading" class="loading-container">
-        <div class="loading-spinner"></div>
-        <p>Loading task...</p>
-      </div>
+    <!-- Main Layout -->
+    <div class="theme-dashboard-layout main-layout">
+      <Sidebar />
       
-      <!-- Error message -->
-      <div v-else-if="errorMessage" class="error-container">
-        <p class="error-message">{{ errorMessage }}</p>
-        <button class="back-button" @click="goBack">Back to Dashboard</button>
-      </div>
-      
-      <!-- Task details -->
-      <div v-else-if="task" class="task-details">
-        <div class="task-details-header">
-          <button class="back-button" @click="goBack">
-            &larr; Back to Dashboard
-          </button>
-          
-          <div class="task-actions">
-            <button v-if="!isEditing" class="edit-button" @click="toggleEdit">
-              Edit Task
-            </button>
-            <button class="delete-button" @click="deleteTask">
-              Delete Task
-            </button>
-          </div>
+      <!-- Main content -->
+      <main class="theme-main-content main-content">
+        <!-- Loading state -->
+        <div v-if="isLoading" class="loading-container">
+          <div class="theme-loader loading-spinner"></div>
+          <p class="theme-text-secondary">Loading task...</p>
         </div>
         
-        <!-- View mode -->
-        <div v-if="!isEditing" class="task-details-card">
-          <div class="task-status" :class="task.status">
-            {{ task.status.replace('-', ' ') }}
-          </div>
-          
-          <h2 class="task-title">{{ task.title }}</h2>
-          
-          <div class="task-detail">
-            <strong>Due Date:</strong> {{ formatDate(task.dueDate) }}
-          </div>
-          
-          <div v-if="task.description" class="task-detail description">
-            <strong>Description:</strong>
-            <p>{{ task.description }}</p>
-          </div>
+        <!-- Error message -->
+        <div v-else-if="errorMessage" class="error-container">
+          <p class="error-message theme-text-primary">{{ errorMessage }}</p>
+          <button class="theme-button-primary back-button" @click="goBack">Back to Dashboard</button>
         </div>
         
-        <!-- Edit mode -->
-        <div v-else class="task-edit-form">
-          <h2>Edit Task</h2>
-          
-          <div class="form-group">
-            <label for="title">Title *</label>
-            <input 
-              id="title" 
-              type="text" 
-              v-model="editForm.title" 
-              placeholder="Enter task title"
-              required
-            />
+        <!-- Task details -->
+        <div v-else-if="task" class="task-details">
+          <div class="task-details-header">
+            <button class="theme-button-secondary back-button" @click="goBack">
+              &larr; Back to Dashboard
+            </button>
+            
+            <div class="task-actions">
+              <button v-if="!isEditing" class="theme-button-secondary edit-button" @click="toggleEdit">
+                Edit Task
+              </button>
+              <button class="theme-button-secondary delete-button" @click="deleteTask">
+                Delete Task
+              </button>
+            </div>
           </div>
           
-          <div class="form-group">
-            <label for="description">Description</label>
-            <textarea 
-              id="description" 
-              v-model="editForm.description" 
-              placeholder="Enter task description (optional)"
-              rows="3"
-            ></textarea>
-          </div>
-          
-          <div class="form-row">
-            <div class="form-group">
-              <label for="status">Status *</label>
-              <select id="status" v-model="editForm.status">
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </select>
+          <!-- View mode -->
+          <div v-if="!isEditing" class="theme-card task-details-card">
+            <div class="theme-status-pill" :class="task.status">
+              {{ task.status.replace('-', ' ') }}
             </div>
             
+            <h2 class="task-title theme-text-primary">{{ task.title }}</h2>
+            
+            <div class="task-detail theme-text-secondary">
+              <strong class="theme-text-primary">Due Date:</strong> {{ formatDate(task.dueDate) }}
+            </div>
+            
+            <div v-if="task.description" class="task-detail description">
+              <strong class="theme-text-primary">Description:</strong>
+              <p class="theme-text-secondary">{{ task.description }}</p>
+            </div>
+          </div>
+          
+          <!-- Edit mode -->
+          <div v-else class="theme-card task-edit-form">
+            <h2 class="form-title theme-text-primary">Edit Task</h2>
+            
             <div class="form-group">
-              <label for="due-date">Due Date/Time *</label>
+              <label for="title" class="theme-text-secondary">Title *</label>
               <input 
-                id="due-date" 
-                type="datetime-local" 
-                v-model="editForm.dueDate"
+                id="title" 
+                type="text" 
+                v-model="editForm.title" 
+                class="theme-input form-input" 
+                placeholder="Enter task title"
                 required
               />
             </div>
-          </div>
-          
-          <div class="form-actions">
-            <button 
-              class="cancel-button" 
-              @click="toggleEdit"
-            >
-              Cancel
-            </button>
-            <button 
-              class="save-button" 
-              @click="saveTask"
-            >
-              Save Changes
-            </button>
+            
+            <div class="form-group">
+              <label for="description" class="theme-text-secondary">Description</label>
+              <textarea 
+                id="description" 
+                v-model="editForm.description" 
+                class="theme-input form-textarea" 
+                placeholder="Enter task description (optional)"
+                rows="3"
+              ></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="status" class="theme-text-secondary">Status *</label>
+                <select id="status" v-model="editForm.status" class="theme-input form-select">
+                  <option value="pending">Pending</option>
+                  <option value="in-progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="dueDate" class="theme-text-secondary">Due Date *</label>
+                <input 
+                  id="dueDate" 
+                  type="datetime-local" 
+                  v-model="editForm.dueDate"
+                  class="theme-input form-input"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="theme-button-secondary cancel-button" @click="toggleEdit">
+                Cancel
+              </button>
+              <button type="button" class="theme-button-primary save-button" @click="saveTask">
+                Save Changes
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .task-details-container {
   min-height: 100vh;
-  background-color: #f6f7fb;
+  background-color: var(--bg-primary);
 }
 
-.header {
+.main-layout {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-.logo h1 {
-  color: #0066ff;
-  font-size: 20px;
-  font-weight: 700;
-  margin: 0;
+  min-height: calc(100vh - 56px);
 }
 
 .main-content {
+  flex: 1;
   padding: 24px;
-  max-width: 800px;
-  margin: 0 auto;
+  overflow-y: auto;
 }
 
 .loading-container {
@@ -269,22 +260,13 @@ const deleteTask = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 400px;
+  height: 60vh;
 }
 
 .loading-spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top: 4px solid #0066ff;
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
   margin-bottom: 16px;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
 }
 
 .error-container {
@@ -292,227 +274,170 @@ const deleteTask = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 300px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 24px;
+  height: 60vh;
 }
 
 .error-message {
-  color: #e65050;
-  font-size: 18px;
   margin-bottom: 24px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.back-button {
+  padding: 8px 16px;
+  cursor: pointer;
 }
 
 .task-details-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
   margin-bottom: 24px;
 }
 
 .task-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
 }
 
-.back-button {
-  background-color: transparent;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.edit-button, .delete-button {
   padding: 8px 16px;
-  font-size: 14px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.back-button:hover {
-  background-color: #f5f5f5;
-}
-
-.edit-button {
-  background-color: #0066ff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.edit-button:hover {
-  background-color: #0052cc;
 }
 
 .delete-button {
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 16px;
-  font-size: 14px;
-  cursor: pointer;
+  border-color: var(--error-color);
+  color: var(--error-color);
 }
 
 .delete-button:hover {
-  background-color: #d32f2f;
+  background-color: rgba(244, 67, 54, 0.1);
 }
 
 .task-details-card {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 24px;
+  margin-bottom: 24px;
 }
 
 .task-status {
   display: inline-block;
+  padding: 4px 12px;
+  border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 4px;
-  text-transform: capitalize;
   margin-bottom: 16px;
+  text-transform: capitalize;
 }
 
-.task-status.pending {
-  background-color: #fff4e5;
-  color: #ff9800;
+.theme-status-pill.pending {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: var(--status-new);
 }
 
-.task-status.in-progress {
-  background-color: #e3f2fd;
-  color: #2196f3;
+.theme-status-pill.in-progress {
+  background-color: rgba(33, 150, 243, 0.15);
+  color: var(--status-in-progress);
 }
 
-.task-status.completed {
-  background-color: #e8f5e9;
-  color: #4caf50;
+.theme-status-pill.completed {
+  background-color: rgba(156, 39, 176, 0.15);
+  color: var(--status-completed);
 }
 
 .task-title {
-  margin: 0 0 24px 0;
   font-size: 24px;
-  color: #333;
+  font-weight: 600;
+  margin: 0 0 16px 0;
 }
 
 .task-detail {
   margin-bottom: 16px;
-  font-size: 14px;
   line-height: 1.5;
 }
 
-.task-detail.description {
-  margin-top: 24px;
+.task-detail strong {
+  font-weight: 600;
+  margin-right: 8px;
 }
 
-.task-detail.description p {
-  margin: 8px 0 0;
-  color: #666;
+.description p {
+  margin: 8px 0 0 0;
   line-height: 1.6;
 }
 
+/* Edit form */
 .task-edit-form {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 24px;
 }
 
-.task-edit-form h2 {
-  margin-top: 0;
-  margin-bottom: 24px;
+.form-title {
   font-size: 20px;
-  color: #333;
+  font-weight: 600;
+  margin: 0 0 24px 0;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-row {
   display: flex;
   gap: 16px;
+  margin-bottom: 20px;
 }
 
 .form-row .form-group {
   flex: 1;
+  margin-bottom: 0;
 }
 
 label {
   display: block;
-  font-size: 14px;
-  font-weight: 500;
   margin-bottom: 8px;
-  color: #333;
-}
-
-input, select, textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  font-weight: 500;
   font-size: 14px;
 }
 
-input:focus, select:focus, textarea:focus {
-  border-color: #0066ff;
-  outline: none;
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 12px;
   margin-top: 24px;
 }
 
-.cancel-button {
-  background-color: #f5f5f5;
-  color: #666;
-  border: none;
-  border-radius: 4px;
+.cancel-button, .save-button {
   padding: 10px 16px;
-  font-size: 14px;
   cursor: pointer;
-}
-
-.cancel-button:hover {
-  background-color: #e5e5e5;
-}
-
-.save-button {
-  background-color: #0066ff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.save-button:hover {
-  background-color: #0052cc;
 }
 
 @media (max-width: 768px) {
   .form-row {
     flex-direction: column;
-    gap: 0;
+    gap: 20px;
   }
   
   .task-details-header {
     flex-direction: column;
-    align-items: flex-start;
     gap: 16px;
   }
   
   .task-actions {
     width: 100%;
-    justify-content: space-between;
+  }
+  
+  .edit-button, .delete-button {
+    flex: 1;
   }
 }
 </style> 

@@ -2,12 +2,25 @@
 import { onMounted, ref, watchEffect, onBeforeUnmount } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from './stores/auth'
+import { useThemeStore } from './stores/theme'
 import IdleTimer from './utils/idleTimer'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const initialLoading = ref(true)
 let idleTimer: IdleTimer | null = null
+
+// Initialize theme system
+onMounted(() => {
+  // Setup listener for system theme changes
+  const cleanupThemeListener = themeStore.setupSystemThemeListener()
+  
+  // Clean up listener on component unmount
+  onBeforeUnmount(() => {
+    cleanupThemeListener()
+  })
+})
 
 // Initialize the idle timer
 const initIdleTimer = () => {
@@ -111,11 +124,120 @@ onMounted(async () => {
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/* Light theme variables (default) */
 :root {
+  /* Primary palette */
+  --primary-color: #1976d2;
+  --primary-light: #42a5f5;
+  --primary-dark: #0d47a1;
+  --primary-text: #ffffff;
+  
+  /* Secondary palette */
+  --secondary-color: #4caf50;
+  --secondary-light: #80e27e;
+  --secondary-dark: #087f23;
+  --secondary-text: #ffffff;
+  
+  /* Text colors */
+  --text-primary: #323338;
+  --text-secondary: #676879;
+  --text-disabled: #b3b3b3;
+  
+  /* Background colors */
+  --bg-primary: #f7f8fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f5f6f8;
+  --bg-card: #ffffff;
+  
+  /* Border colors */
+  --border-color: #e6e9ef;
+  --divider-color: #e0e0e0;
+  
+  /* Status colors */
+  --success-color: #00c875;
+  --error-color: #f44336;
+  --warning-color: #ff9800;
+  --info-color: #2196f3;
+  
+  /* Task status colors */
+  --status-new: #4CAF50;
+  --status-in-progress: #2196F3;
+  --status-review: #FFC107;
+  --status-completed: #9C27B0;
+  
+  /* UI element colors */
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --hover-bg: #f5f5f5;
+  --focus-ring: rgba(0, 115, 234, 0.3);
+  
+  /* Scrollbar colors */
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #c5c7d0;
+  --scrollbar-thumb-hover: #a8abb6;
+  
+  /* Toast colors */
   --toastify-color-success: #0ab87b;
   --toastify-color-error: #d83a52;
   --toastify-color-warning: #ff9800;
   --toastify-color-info: #0073ea;
+}
+
+/* Dark theme variables */
+.dark-theme {
+  /* Primary palette */
+  --primary-color: #42a5f5;
+  --primary-light: #80d6ff;
+  --primary-dark: #0077c2;
+  --primary-text: #ffffff;
+  
+  /* Secondary palette */
+  --secondary-color: #4caf50;
+  --secondary-light: #80e27e;
+  --secondary-dark: #087f23;
+  --secondary-text: #ffffff;
+  
+  /* Text colors */
+  --text-primary: #e0e0e0;
+  --text-secondary: #9e9e9e;
+  --text-disabled: #616161;
+  
+  /* Background colors */
+  --bg-primary: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-tertiary: #2c2c2c;
+  --bg-card: #2c2c2c;
+  
+  /* Border colors */
+  --border-color: #424242;
+  --divider-color: #424242;
+  
+  /* Status colors */
+  --success-color: #00c853;
+  --error-color: #ff5252;
+  --warning-color: #ffab40;
+  --info-color: #448aff;
+  
+  /* Task status colors */
+  --status-new: #66bb6a;
+  --status-in-progress: #42a5f5;
+  --status-review: #ffca28;
+  --status-completed: #ba68c8;
+  
+  /* UI element colors */
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --hover-bg: #383838;
+  --focus-ring: rgba(66, 165, 245, 0.4);
+  
+  /* Scrollbar colors */
+  --scrollbar-track: #2c2c2c;
+  --scrollbar-thumb: #616161;
+  --scrollbar-thumb-hover: #757575;
+  
+  /* Toast colors */
+  --toastify-color-success: #00c853;
+  --toastify-color-error: #ff5252;
+  --toastify-color-warning: #ffab40;
+  --toastify-color-info: #448aff;
 }
 
 html {
@@ -127,11 +249,12 @@ html {
 
 body {
   min-height: 100%;
-  background-color: #f7f8fa;
-  color: #323338;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   line-height: 1.5;
   margin: 0;
   padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #app {
@@ -155,17 +278,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrollbar-track);
   border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c5c7d0;
+  background: var(--scrollbar-thumb);
   border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8abb6;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Utility classes */
@@ -192,7 +315,7 @@ body {
 
 .focus-ring:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 115, 234, 0.3), 0 0 0 4px rgba(0, 115, 234, 0.2);
+  box-shadow: 0 0 0 2px var(--focus-ring), 0 0 0 4px rgba(0, 115, 234, 0.2);
 }
 
 /* Transition classes */
@@ -216,7 +339,7 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f5f5f5;
+  background-color: var(--bg-secondary);
 }
 
 .spinner {
@@ -224,7 +347,7 @@ body {
   height: 40px;
   border: 4px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
-  border-top-color: #1976d2;
+  border-top-color: var(--primary-color);
   animation: spin 1s ease-in-out infinite;
   margin-bottom: 16px;
 }
@@ -233,5 +356,11 @@ body {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Dark mode overrides for spinner */
+.dark-theme .spinner {
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--primary-color);
 }
 </style>

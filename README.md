@@ -25,6 +25,7 @@ Caseworkers at HMCTS require a system to manage their daily tasks efficiently. T
 - Vue.js
 - Axios
 - Bootstrap
+- Tailwind
 
 ---
 
@@ -53,6 +54,7 @@ Caseworkers at HMCTS require a system to manage their daily tasks efficiently. T
 - Node.js and npm
 - PostgreSQL
 - Git
+- Vue3.js
 
 ### Backend Setup
 
@@ -62,6 +64,7 @@ npm install
 cp .env.example .env  # Edit database credentials accordingly
 npx sequelize db:create
 npx sequelize db:migrate
+npx sequelize db:seed:all
 npm run dev  # Starts the server on localhost:3000 
 ```
 
@@ -71,7 +74,7 @@ npm run dev  # Starts the server on localhost:3000
 ```bash
 cd frontend
 npm install
-npm run serve  # Starts the frontend on localhost:8080
+npm run dev  # Starts the frontend on localhost:5173
 ```
 
 ### Running Test

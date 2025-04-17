@@ -2,10 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import { useThemeStore } from '../../stores/theme'
 import logoSrc from '../../assets/logo.svg'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 const email = ref('')
 const password = ref('')
 const isLoading = ref(false)
@@ -114,31 +116,42 @@ const login = async () => {
     isLoading.value = false
   }
 }
+
+// Toggle theme
+const toggleTheme = () => {
+  themeStore.toggleTheme()
+}
 </script>
 
 <template>
-  <div class="login-page">
-    <div class="login-container">
+  <div class="theme-view-container login-page">
+    <div class="theme-card login-container">
       <div class="login-content">
         <div class="logo-container">
           <img :src="logoSrc" alt="App Logo" class="app-logo" />
+          <div class="theme-toggle">
+            <button @click="toggleTheme" class="theme-toggle-button">
+              <span v-if="themeStore.isDark" class="theme-icon">🌙</span>
+              <span v-else class="theme-icon">☀️</span>
+            </button>
+          </div>
         </div>
         
         <div class="form-container">
-          <h1 class="login-title">Log in to your account</h1>
+          <h1 class="login-title theme-text-primary">Log in to your account</h1>
           
           <!-- Session Expired Message -->
           <div v-if="sessionExpired" class="timeout-message">
             <div class="timeout-icon">⚠️</div>
-            <p>{{ timeoutMessage }}</p>
+            <p class="theme-text-primary">{{ timeoutMessage }}</p>
           </div>
           
           <!-- Success Message -->
           <div v-if="loginSuccess" class="success-message">
             <div class="success-icon">✓</div>
             <div class="success-text">
-              <h3>Login Successful!</h3>
-              <p>Redirecting to your dashboard...</p>
+              <h3 class="theme-text-primary">Login Successful!</h3>
+              <p class="theme-text-secondary">Redirecting to your dashboard...</p>
             </div>
           </div>
           
@@ -153,7 +166,7 @@ const login = async () => {
                 id="email" 
                 type="email" 
                 v-model="email" 
-                class="form-input" 
+                class="form-input theme-input" 
                 placeholder="Work email"
                 @blur="validateEmail"
                 required
@@ -168,7 +181,7 @@ const login = async () => {
                 id="password" 
                 type="password" 
                 v-model="password" 
-                class="form-input" 
+                class="form-input theme-input" 
                 placeholder="Password"
                 @blur="validatePassword"
                 required
@@ -185,55 +198,26 @@ const login = async () => {
                   v-model="rememberMe"
                   class="remember-checkbox"
                 />
-                <span class="remember-text">Remember me</span>
+                <span class="remember-text theme-text-secondary">Remember me</span>
               </label>
               
-              <a href="#" class="forgot-link">Forgot your password?</a>
+              <a href="#" class="forgot-link theme-text-primary">Forgot your password?</a>
             </div>
             
             <button 
               type="submit"
-              class="login-button"
+              class="login-button theme-button-primary"
               :disabled="isLoading"
             >
-              <span v-if="isLoading" class="button-spinner"></span>
+              <span v-if="isLoading" class="button-spinner theme-loader"></span>
               <span v-else>Log in</span>
             </button>
-
-            <div class="divider">
-              <span>Or</span>
+            
+            <div class="register-prompt">
+              <span class="theme-text-secondary">Don't have an account?</span>
+              <router-link to="/register" class="register-link">Register</router-link>
             </div>
-
-            <!-- Social buttons not needed for now -->
-            <!-- <div class="social-buttons">
-              <button type="button" class="social-button google">
-                <svg width="18" height="18" viewBox="0 0 48 48">
-                  <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                  <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                  <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                  <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                </svg>
-                <span>Continue with Google</span>
-              </button>
-
-              <button type="button" class="social-button microsoft">
-                <svg width="18" height="18" viewBox="0 0 21 21">
-                  <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
-                  <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
-                  <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
-                  <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
-                </svg>
-                <span>Continue with Microsoft</span>
-              </button>
-            </div> -->
           </form>
-        </div>
-        
-        <div class="register-section" v-if="!loginSuccess">
-          <p>
-            Don't have an account? 
-            <router-link to="/register" class="register-link">Sign up</router-link>
-          </p>
         </div>
       </div>
     </div>
@@ -243,34 +227,58 @@ const login = async () => {
 <style scoped>
 .login-page {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
+  padding: 20px;
+  background-color: var(--bg-primary);
 }
 
 .login-container {
   width: 100%;
   max-width: 480px;
-  margin: 0 auto;
-  padding: 24px;
+  overflow: hidden;
+  border-radius: 12px;
+  transition: all 0.3s ease;
 }
 
 .login-content {
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  padding: 32px;
+  padding: 40px;
 }
 
 .logo-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 24px;
+  align-items: center;
+  margin-bottom: 32px;
+  position: relative;
 }
 
 .app-logo {
-  height: 40px;
+  height: 48px;
+}
+
+.theme-toggle {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.theme-toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+}
+
+.theme-toggle-button:hover {
+  background-color: var(--hover-bg);
+}
+
+.theme-icon {
+  font-size: 20px;
 }
 
 .login-title {
@@ -280,17 +288,55 @@ const login = async () => {
   text-align: center;
 }
 
+.timeout-message {
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 193, 7, 0.15);
+  color: var(--warning-color);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.timeout-icon {
+  margin-right: 12px;
+  font-size: 20px;
+}
+
+.success-message {
+  display: flex;
+  align-items: center;
+  background-color: rgba(76, 175, 80, 0.15);
+  color: var(--success-color);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--success-color);
+  color: white;
+  border-radius: 50%;
+  margin-right: 12px;
+  font-size: 16px;
+}
+
 .error-message {
-  background-color: #ffebee;
-  color: #f44336;
-  padding: 12px;
-  border-radius: 4px;
-  margin-bottom: 16px;
-  font-size: 14px;
+  background-color: rgba(244, 67, 54, 0.15);
+  color: var(--error-color);
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
 }
 
 .login-form {
-  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group {
@@ -299,23 +345,28 @@ const login = async () => {
 
 .form-input {
   width: 100%;
-  padding: 12px 16px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 8px;
   font-size: 14px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  transition: border-color 0.3s;
+  transition: all 0.2s;
 }
 
-.form-input:focus {
-  border-color: #1976d2;
-  outline: none;
+.has-error .form-input {
+  border-color: var(--error-color);
+}
+
+.validation-error {
+  color: var(--error-color);
+  font-size: 12px;
+  margin-top: 4px;
 }
 
 .options-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .remember-wrapper {
@@ -328,14 +379,14 @@ const login = async () => {
   margin-right: 8px;
 }
 
-.remember-text {
+.remember-text, .forgot-link {
   font-size: 14px;
 }
 
 .forgot-link {
-  font-size: 14px;
-  color: #1976d2;
+  color: var(--primary-color);
   text-decoration: none;
+  transition: color 0.2s;
 }
 
 .forgot-link:hover {
@@ -343,170 +394,47 @@ const login = async () => {
 }
 
 .login-button {
-  width: 100%;
-  padding: 12px;
-  background-color: #1976d2;
-  color: white;
+  height: 44px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.2s;
   position: relative;
 }
 
-.login-button:hover {
-  background-color: #1565c0;
-}
-
 .login-button:disabled {
-  background-color: #90caf9;
+  opacity: 0.7;
   cursor: not-allowed;
 }
 
 .button-spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: #fff;
-  animation: spin 1s ease-in-out infinite;
+  width: 20px;
+  height: 20px;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  margin: 24px 0;
-}
-
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.divider span {
-  padding: 0 16px;
-  font-size: 14px;
-  color: #757575;
-}
-
-.social-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.social-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  background-color: white;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.social-button svg {
-  margin-right: 8px;
-}
-
-.social-button:hover {
-  background-color: #f5f5f5;
-}
-
-.register-section {
-  text-align: center;
+.register-prompt {
   margin-top: 24px;
+  text-align: center;
   font-size: 14px;
 }
 
 .register-link {
-  color: #1976d2;
+  color: var(--primary-color);
   text-decoration: none;
+  margin-left: 4px;
   font-weight: 500;
+  transition: color 0.2s;
 }
 
 .register-link:hover {
   text-decoration: underline;
 }
 
-.validation-error {
-  color: #f44336;
-  font-size: 12px;
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-.has-error .form-input {
-  border-color: #f44336;
-}
-
-.success-message {
-  background-color: #e6f7ed;
-  border: 1px solid #b7e6cd;
-  border-radius: 4px;
-  padding: 16px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-}
-
-.success-icon {
-  width: 30px;
-  height: 30px;
-  background-color: #4caf50;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  margin-right: 16px;
-}
-
-.success-text h3 {
-  margin: 0 0 4px;
-  color: #2e7d32;
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.success-text p {
-  margin: 0;
-  color: #388e3c;
-  font-size: 14px;
-}
-
-.timeout-message {
-  background-color: #fff8e1;
-  border-left: 4px solid #ffc107;
-  padding: 12px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  border-radius: 4px;
-}
-
-.timeout-icon {
-  margin-right: 12px;
-  font-size: 20px;
-}
-
-.timeout-message p {
-  margin: 0;
-  color: #5d4037;
+@media (max-width: 480px) {
+  .login-content {
+    padding: 24px;
+  }
 }
 </style>

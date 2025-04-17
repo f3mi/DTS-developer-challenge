@@ -2,11 +2,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useTaskStore, type Task } from '../stores/tasks'
 import { useAuthStore } from '../stores/auth'
+import { useThemeStore } from '../stores/theme'
 import AppHeader from '../components/AppHeader.vue'
 import Sidebar from '../components/Sidebar.vue'
 
 const taskStore = useTaskStore()
 const authStore = useAuthStore()
+const themeStore = useThemeStore()
 
 // Reactive variables
 const isLoading = ref(true)
@@ -139,7 +141,7 @@ function setActiveReport(reportType: string): void {
 </script>
 
 <template>
-  <div class="reports-view">
+  <div class="theme-view-container reports-view">
     <!-- Header section -->
     <AppHeader 
       :reminderCount="taskStore.tasksDueSoon.length"
@@ -148,15 +150,15 @@ function setActiveReport(reportType: string): void {
     />
     
     <!-- Main Layout -->
-    <div class="dashboard-layout">
+    <div class="theme-dashboard-layout dashboard-layout">
       <Sidebar />
       
       <!-- Main Content -->
-      <main class="reports-main">
+      <main class="theme-main-content reports-main">
         <!-- Loading State -->
         <div v-if="isLoading" class="loading-container">
-          <div class="loading-spinner"></div>
-          <p class="loading-text">Loading reports data...</p>
+          <div class="theme-loader loading-spinner"></div>
+          <p class="theme-text-secondary loading-text">Loading reports data...</p>
         </div>
   
         <!-- Reports Content -->
@@ -164,48 +166,53 @@ function setActiveReport(reportType: string): void {
           <!-- Page header -->
           <div class="page-header">
             <div class="page-title">
-              <h1>Reports Dashboard</h1>
-              <p class="subtitle">Analytics and insights about your task management</p>
+              <h1 class="theme-text-primary">Reports Dashboard</h1>
+              <p class="subtitle theme-text-secondary">Analytics and insights about your task management</p>
             </div>
             <div class="date-filter">
               <div class="date-range">
-                <label for="start-date">From:</label>
+                <label for="start-date" class="theme-text-secondary">From:</label>
                 <input 
                   type="date" 
                   id="start-date" 
                   v-model="dateRange.start" 
                   @change="updateDateRange"
+                  class="theme-input"
                 />
               </div>
               <div class="date-range">
-                <label for="end-date">To:</label>
+                <label for="end-date" class="theme-text-secondary">To:</label>
                 <input 
                   type="date" 
                   id="end-date" 
                   v-model="dateRange.end"
                   @change="updateDateRange"
+                  class="theme-input"
                 />
               </div>
             </div>
           </div>
   
           <!-- Report Types Navigation -->
-          <div class="report-tabs">
+          <div class="theme-tabs report-tabs">
             <button 
               :class="{ active: activeReport === 'overview' }"
               @click="setActiveReport('overview')"
+              class="theme-tab-button"
             >
               Overview
             </button>
             <button 
               :class="{ active: activeReport === 'performance' }"
               @click="setActiveReport('performance')"
+              class="theme-tab-button"
             >
               Performance
             </button>
             <button 
               :class="{ active: activeReport === 'detailed' }"
               @click="setActiveReport('detailed')"
+              class="theme-tab-button"
             >
               Detailed Reports
             </button>
@@ -217,100 +224,100 @@ function setActiveReport(reportType: string): void {
             <div v-if="activeReport === 'overview'" class="overview-report">
               <!-- Summary Cards -->
               <div class="summary-cards">
-                <div class="card">
-                  <h3>Total Tasks</h3>
-                  <div class="card-value">{{ totalTasks }}</div>
+                <div class="theme-card card">
+                  <h3 class="theme-text-secondary">Total Tasks</h3>
+                  <div class="card-value theme-text-primary">{{ totalTasks }}</div>
                 </div>
-                <div class="card">
-                  <h3>Completed</h3>
-                  <div class="card-value">{{ completedTasks }}</div>
-                  <div class="card-rate">{{ completionRate }}% completion rate</div>
+                <div class="theme-card card">
+                  <h3 class="theme-text-secondary">Completed</h3>
+                  <div class="card-value theme-text-primary">{{ completedTasks }}</div>
+                  <div class="card-rate theme-text-secondary">{{ completionRate }}% completion rate</div>
                 </div>
-                <div class="card">
-                  <h3>In Progress</h3>
-                  <div class="card-value">{{ inProgressTasks }}</div>
+                <div class="theme-card card">
+                  <h3 class="theme-text-secondary">In Progress</h3>
+                  <div class="card-value theme-text-primary">{{ inProgressTasks }}</div>
                 </div>
-                <div class="card">
-                  <h3>Overdue</h3>
-                  <div class="card-value">{{ overdueTasks }}</div>
+                <div class="theme-card card">
+                  <h3 class="theme-text-secondary">Overdue</h3>
+                  <div class="card-value theme-text-primary">{{ overdueTasks }}</div>
                 </div>
               </div>
               
               <!-- Charts Section -->
               <div class="charts-section">
-                <div class="chart-container">
-                  <h3>Completion Rate</h3>
+                <div class="theme-card chart-container">
+                  <h3 class="theme-text-secondary">Completion Rate</h3>
                   <div class="completion-chart">
                     <div class="progress-circle">
                       <svg width="120" height="120" viewBox="0 0 120 120">
-                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" stroke-width="12" />
+                        <circle cx="60" cy="60" r="54" fill="none" stroke="var(--bg-tertiary)" stroke-width="12" />
                         <circle 
                           cx="60" 
                           cy="60" 
                           r="54" 
                           fill="none" 
-                          stroke="#4caf50" 
+                          stroke="var(--success-color)" 
                           stroke-width="12"
                           stroke-dasharray="339.292"
                           :stroke-dashoffset="339.292 * (1 - completionRate / 100)"
                           transform="rotate(-90 60 60)"
                         />
                       </svg>
-                      <div class="progress-text">{{ completionRate }}%</div>
+                      <div class="progress-text theme-text-primary">{{ completionRate }}%</div>
                     </div>
                   </div>
                 </div>
                 
-                <div class="chart-container">
-                  <h3>Status Distribution</h3>
+                <div class="theme-card chart-container">
+                  <h3 class="theme-text-secondary">Status Distribution</h3>
                   <div class="status-bars">
                     <div class="status-bar">
-                      <div class="bar-label">Completed</div>
+                      <div class="bar-label theme-text-secondary">Completed</div>
                       <div class="bar-container">
                         <div 
                           class="bar completed" 
                           :style="{ width: `${statusDistribution.completed}%` }"
                         ></div>
                       </div>
-                      <div class="bar-value">{{ statusDistribution.completed }}%</div>
+                      <div class="bar-value theme-text-primary">{{ statusDistribution.completed }}%</div>
                     </div>
                     <div class="status-bar">
-                      <div class="bar-label">In Progress</div>
+                      <div class="bar-label theme-text-secondary">In Progress</div>
                       <div class="bar-container">
                         <div 
                           class="bar in-progress" 
                           :style="{ width: `${statusDistribution.inProgress}%` }"
                         ></div>
                       </div>
-                      <div class="bar-value">{{ statusDistribution.inProgress }}%</div>
+                      <div class="bar-value theme-text-primary">{{ statusDistribution.inProgress }}%</div>
                     </div>
                     <div class="status-bar">
-                      <div class="bar-label">Pending</div>
+                      <div class="bar-label theme-text-secondary">Pending</div>
                       <div class="bar-container">
                         <div 
                           class="bar pending" 
                           :style="{ width: `${statusDistribution.pending}%` }"
                         ></div>
                       </div>
-                      <div class="bar-value">{{ statusDistribution.pending }}%</div>
+                      <div class="bar-value theme-text-primary">{{ statusDistribution.pending }}%</div>
                     </div>
                     <div class="status-bar">
-                      <div class="bar-label">Overdue</div>
+                      <div class="bar-label theme-text-secondary">Overdue</div>
                       <div class="bar-container">
                         <div 
                           class="bar overdue" 
                           :style="{ width: `${statusDistribution.overdue}%` }"
                         ></div>
                       </div>
-                      <div class="bar-value">{{ statusDistribution.overdue }}%</div>
+                      <div class="bar-value theme-text-primary">{{ statusDistribution.overdue }}%</div>
                     </div>
                   </div>
                 </div>
               </div>
               
               <!-- Weekly Activity Chart -->
-              <div class="weekly-activity">
-                <h3>Weekly Activity</h3>
+              <div class="theme-card weekly-activity">
+                <h3 class="theme-text-secondary">Weekly Activity</h3>
                 <div class="bar-chart">
                   <div 
                     v-for="(day, index) in weeklyCompletionData" 
@@ -321,8 +328,8 @@ function setActiveReport(reportType: string): void {
                       class="chart-bar" 
                       :style="{ height: `${Math.max(day.count * 20, 10)}px` }"
                     ></div>
-                    <div class="chart-label">{{ day.day }}</div>
-                    <div class="chart-value">{{ day.count }}</div>
+                    <div class="chart-label theme-text-secondary">{{ day.day }}</div>
+                    <div class="chart-value theme-text-primary">{{ day.count }}</div>
                   </div>
                 </div>
               </div>
@@ -330,19 +337,19 @@ function setActiveReport(reportType: string): void {
             
             <!-- Performance Report -->
             <div v-else-if="activeReport === 'performance'" class="performance-report">
-              <h2>Performance Metrics</h2>
-              <p>Task completion analytics and productivity insights</p>
+              <h2 class="theme-text-primary">Performance Metrics</h2>
+              <p class="theme-text-secondary">Task completion analytics and productivity insights</p>
               
               <!-- Time-based metrics -->
               <div class="metrics-grid">
-                <div class="metric-card">
-                  <h3>Task Completion Time</h3>
+                <div class="theme-card metric-card">
+                  <h3 class="theme-text-secondary">Task Completion Time</h3>
                   <div class="metric-chart">
                     <div class="time-metric">
-                      <div class="time-value">2.4</div>
-                      <div class="time-unit">days</div>
+                      <div class="time-value theme-text-primary">2.4</div>
+                      <div class="time-unit theme-text-secondary">days</div>
                     </div>
-                    <div class="metric-label">Average completion time</div>
+                    <div class="metric-label theme-text-secondary">Average completion time</div>
                     <div class="metric-trend positive">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="18 15 12 9 6 15"></polyline>
@@ -351,122 +358,21 @@ function setActiveReport(reportType: string): void {
                     </div>
                   </div>
                 </div>
-
-                <div class="metric-card">
-                  <h3>Response Time</h3>
+                
+                <div class="theme-card metric-card">
+                  <h3 class="theme-text-secondary">Tasks Completed</h3>
                   <div class="metric-chart">
                     <div class="time-metric">
-                      <div class="time-value">4.7</div>
-                      <div class="time-unit">hours</div>
+                      <div class="time-value theme-text-primary">{{ completedTasks }}</div>
+                      <div class="time-unit theme-text-secondary">tasks</div>
                     </div>
-                    <div class="metric-label">Average time to start tasks</div>
-                    <div class="metric-trend negative">
+                    <div class="metric-label theme-text-secondary">Completed this period</div>
+                    <div class="metric-trend positive">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 12 15 18 9"></polyline>
+                        <polyline points="18 15 12 9 6 15"></polyline>
                       </svg>
-                      <span>8% slower than last month</span>
+                      <span>8% more than previous period</span>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Productivity score -->
-              <div class="productivity-section">
-                <h3>Productivity Score</h3>
-                <div class="productivity-chart">
-                  <div class="score-gauge">
-                    <svg width="200" height="120" viewBox="0 0 200 120">
-                      <!-- Background arc -->
-                      <path d="M20,100 A80,80 0 0,1 180,100" fill="none" stroke="#e6e6e6" stroke-width="16" stroke-linecap="round" />
-                      <!-- Value arc (76% filled) -->
-                      <path d="M20,100 A80,80 0 0,1 153,60" fill="none" stroke="#4caf50" stroke-width="16" stroke-linecap="round" />
-                      <!-- Marker -->
-                      <circle cx="153" cy="60" r="8" fill="#333" />
-                    </svg>
-                    <div class="score-value">76</div>
-                    <div class="score-label">out of 100</div>
-                  </div>
-                  <div class="score-details">
-                    <div class="score-item">
-                      <div class="score-name">Tasks completed on time</div>
-                      <div class="score-bar-container">
-                        <div class="score-bar" style="width: 82%"></div>
-                      </div>
-                      <div class="score-percentage">82%</div>
-                    </div>
-                    <div class="score-item">
-                      <div class="score-name">Response rate</div>
-                      <div class="score-bar-container">
-                        <div class="score-bar" style="width: 90%"></div>
-                      </div>
-                      <div class="score-percentage">90%</div>
-                    </div>
-                    <div class="score-item">
-                      <div class="score-name">Workload balance</div>
-                      <div class="score-bar-container">
-                        <div class="score-bar" style="width: 65%"></div>
-                      </div>
-                      <div class="score-percentage">65%</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Monthly comparison -->
-              <div class="comparison-section">
-                <h3>Monthly Comparison</h3>
-                <div class="comparison-chart">
-                  <div class="month-column">
-                    <div class="month-label">January</div>
-                    <div class="month-bar-container">
-                      <div class="month-bar" style="height: 160px;"></div>
-                      <div class="month-value">24</div>
-                    </div>
-                  </div>
-                  <div class="month-column">
-                    <div class="month-label">February</div>
-                    <div class="month-bar-container">
-                      <div class="month-bar" style="height: 120px;"></div>
-                      <div class="month-value">18</div>
-                    </div>
-                  </div>
-                  <div class="month-column">
-                    <div class="month-label">March</div>
-                    <div class="month-bar-container">
-                      <div class="month-bar" style="height: 140px;"></div>
-                      <div class="month-value">21</div>
-                    </div>
-                  </div>
-                  <div class="month-column">
-                    <div class="month-label">April</div>
-                    <div class="month-bar-container">
-                      <div class="month-bar" style="height: 180px;"></div>
-                      <div class="month-value">27</div>
-                    </div>
-                  </div>
-                  <div class="month-column">
-                    <div class="month-label">May</div>
-                    <div class="month-bar-container">
-                      <div class="month-bar" style="height: 200px;"></div>
-                      <div class="month-value">30</div>
-                    </div>
-                  </div>
-                  <div class="month-column">
-                    <div class="month-label">June</div>
-                    <div class="month-bar-container">
-                      <div class="month-bar current" style="height: 220px;"></div>
-                      <div class="month-value">33</div>
-                    </div>
-                  </div>
-                </div>
-                <div class="comparison-legend">
-                  <div class="legend-item">
-                    <div class="legend-color"></div>
-                    <div class="legend-label">Tasks completed per month</div>
-                  </div>
-                  <div class="legend-item">
-                    <div class="legend-color current"></div>
-                    <div class="legend-label">Current month</div>
                   </div>
                 </div>
               </div>
@@ -474,32 +380,32 @@ function setActiveReport(reportType: string): void {
             
             <!-- Detailed Report -->
             <div v-else-if="activeReport === 'detailed'" class="detailed-report">
-              <h2>Detailed Task Reports</h2>
+              <h2 class="theme-text-primary">Detailed Task Reports</h2>
+              <p class="theme-text-secondary">
+                View all tasks within the selected date range. Filter and sort to analyze your task management patterns.
+              </p>
               
-              <!-- Tasks in date range -->
-              <div class="tasks-in-range">
-                <h3>Tasks within selected date range ({{ tasksInDateRange.length }})</h3>
-                
-                <table class="tasks-table">
+              <div class="theme-card tasks-table-container">
+                <div v-if="tasksInDateRange.length === 0" class="no-tasks theme-text-secondary">
+                  No tasks found in the selected date range.
+                </div>
+                <table v-else class="tasks-table">
                   <thead>
                     <tr>
-                      <th>Title</th>
-                      <th>Status</th>
-                      <th>Due Date</th>
+                      <th class="theme-text-secondary">Task</th>
+                      <th class="theme-text-secondary">Status</th>
+                      <th class="theme-text-secondary">Due Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-for="task in tasksInDateRange" :key="task.id">
-                      <td>{{ task.title }}</td>
+                      <td class="theme-text-primary">{{ task.title }}</td>
                       <td>
-                        <span :class="`status-badge ${task.status}`">
-                          {{ task.status }}
+                        <span class="theme-status-pill" :class="task.status">
+                          {{ task.status.replace('-', ' ') }}
                         </span>
                       </td>
-                      <td>{{ formatDate(task.dueDate) }}</td>
-                    </tr>
-                    <tr v-if="tasksInDateRange.length === 0">
-                      <td colspan="3" class="no-data">No tasks in the selected date range</td>
+                      <td class="theme-text-secondary">{{ formatDate(task.dueDate) }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -514,70 +420,61 @@ function setActiveReport(reportType: string): void {
 
 <style scoped>
 .reports-view {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
 }
 
 .dashboard-layout {
   display: flex;
-  flex: 1;
-  overflow: hidden;
 }
 
 .reports-main {
   flex: 1;
-  padding: 20px;
+  padding: 24px;
   overflow-y: auto;
-  background-color: #f5f7fa;
 }
 
 .loading-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 100%;
+  justify-content: center;
+  height: 60vh;
 }
 
 .loading-spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 50%;
-  border-top: 4px solid #3498db;
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.loading-text {
+  font-size: 16px;
 }
 
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 16px;
 }
 
 .page-title h1 {
-  margin: 0;
   font-size: 24px;
-  color: #333;
+  font-weight: 600;
+  margin: 0;
 }
 
-.subtitle {
-  margin: 4px 0 0;
-  color: #666;
+.page-title .subtitle {
   font-size: 14px;
+  margin: 4px 0 0 0;
 }
 
 .date-filter {
   display: flex;
-  gap: 12px;
+  gap: 16px;
 }
 
 .date-range {
@@ -588,128 +485,90 @@ function setActiveReport(reportType: string): void {
 
 .date-range label {
   font-size: 14px;
-  color: #666;
 }
 
-.date-range input {
-  padding: 8px;
-  border: 1px solid #ddd;
+.date-range input[type="date"] {
   border-radius: 4px;
+  padding: 8px;
+  font-size: 14px;
 }
 
 .report-tabs {
-  display: flex;
   margin-bottom: 24px;
-  border-bottom: 1px solid #ddd;
-}
-
-.report-tabs button {
-  padding: 12px 20px;
-  background: none;
-  border: none;
-  border-bottom: 3px solid transparent;
-  font-size: 15px;
-  font-weight: 500;
-  color: #666;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.report-tabs button:hover {
-  color: #333;
-}
-
-.report-tabs button.active {
-  color: #3498db;
-  border-bottom-color: #3498db;
 }
 
 .report-section {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  padding: 20px;
+  margin-top: 24px;
 }
 
-/* Summary Cards */
+/* Overview Report Styles */
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
   margin-bottom: 24px;
 }
 
 .card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border-left: 4px solid #3498db;
+  padding: 24px;
+  text-align: center;
 }
 
 .card h3 {
-  margin: 0 0 12px;
   font-size: 14px;
   font-weight: 500;
-  color: #666;
+  margin: 0 0 12px 0;
 }
 
 .card-value {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 600;
-  color: #333;
+  margin: 0;
 }
 
 .card-rate {
-  margin-top: 4px;
-  font-size: 13px;
-  color: #666;
+  font-size: 14px;
+  margin-top: 8px;
 }
 
-/* Charts Section */
 .charts-section {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .chart-container {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  text-align: center;
 }
 
 .chart-container h3 {
-  margin: 0 0 16px;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  margin: 0 0 16px 0;
 }
 
-/* Completion Chart */
 .completion-chart {
   display: flex;
   justify-content: center;
-  padding: 16px 0;
 }
 
 .progress-circle {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 120px;
+  height: 120px;
 }
 
 .progress-text {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: 24px;
   font-weight: 600;
-  color: #333;
 }
 
-/* Status Bars */
 .status-bars {
   display: flex;
   flex-direction: column;
@@ -717,21 +576,20 @@ function setActiveReport(reportType: string): void {
 }
 
 .status-bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 100px 1fr 60px;
   align-items: center;
   gap: 12px;
 }
 
 .bar-label {
-  width: 90px;
   font-size: 14px;
-  color: #666;
+  text-align: left;
 }
 
 .bar-container {
-  flex: 1;
   height: 8px;
-  background-color: #e6e6e6;
+  background-color: var(--bg-tertiary);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -739,163 +597,109 @@ function setActiveReport(reportType: string): void {
 .bar {
   height: 100%;
   border-radius: 4px;
+  transition: width 0.5s;
 }
 
 .bar.completed {
-  background-color: #4caf50;
+  background-color: var(--status-completed);
 }
 
 .bar.in-progress {
-  background-color: #2196f3;
+  background-color: var(--status-in-progress);
 }
 
 .bar.pending {
-  background-color: #ff9800;
+  background-color: var(--status-new);
 }
 
 .bar.overdue {
-  background-color: #f44336;
+  background-color: var(--error-color);
 }
 
 .bar-value {
-  width: 40px;
   font-size: 14px;
-  color: #333;
+  font-weight: 600;
   text-align: right;
 }
 
-/* Weekly Activity Chart */
 .weekly-activity {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 24px;
   margin-bottom: 24px;
 }
 
 .weekly-activity h3 {
-  margin: 0 0 20px;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  margin: 0 0 16px 0;
+  text-align: center;
 }
 
 .bar-chart {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: flex-end;
-  height: 200px;
-  padding-top: 20px;
+  height: 180px;
 }
 
 .chart-column {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  flex: 1;
 }
 
 .chart-bar {
-  width: 30px;
-  background-color: #3498db;
+  width: 40px;
+  background-color: var(--primary-color);
   border-radius: 4px 4px 0 0;
+  margin-bottom: 8px;
   transition: height 0.5s;
 }
 
 .chart-label {
-  font-size: 13px;
-  color: #666;
+  font-size: 14px;
+  margin-bottom: 4px;
 }
 
 .chart-value {
-  font-size: 13px;
-  font-weight: 500;
-  color: #333;
-}
-
-/* Detailed Report */
-.tasks-in-range {
-  margin-top: 20px;
-}
-
-.tasks-in-range h3 {
-  margin: 0 0 16px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-}
-
-.tasks-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tasks-table th {
-  text-align: left;
-  padding: 12px 16px;
-  border-bottom: 2px solid #eee;
   font-size: 14px;
-  font-weight: 500;
-  color: #666;
-}
-
-.tasks-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-  color: #333;
-}
-
-.status-badge {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 500;
-  text-transform: capitalize;
-}
-
-.status-badge.completed {
-  background-color: rgba(76, 175, 80, 0.1);
-  color: #4caf50;
-}
-
-.status-badge.in-progress {
-  background-color: rgba(33, 150, 243, 0.1);
-  color: #2196f3;
-}
-
-.status-badge.pending {
-  background-color: rgba(255, 152, 0, 0.1);
-  color: #ff9800;
-}
-
-.no-data {
-  text-align: center;
-  color: #666;
-  padding: 24px 0;
+  font-weight: 600;
 }
 
 /* Performance Report Styles */
+.performance-report h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+}
+
+.performance-report > p {
+  font-size: 16px;
+  margin: 0 0 24px 0;
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  gap: 16px;
   margin-bottom: 24px;
 }
 
 .metric-card {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 24px;
 }
 
 .metric-card h3 {
-  margin: 0 0 16px;
   font-size: 16px;
   font-weight: 500;
-  color: #333;
+  margin: 0 0 16px 0;
+  text-align: center;
+}
+
+.metric-chart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .time-metric {
@@ -907,17 +711,14 @@ function setActiveReport(reportType: string): void {
 .time-value {
   font-size: 36px;
   font-weight: 600;
-  color: #333;
 }
 
 .time-unit {
-  font-size: 16px;
-  color: #666;
+  font-size: 18px;
   margin-left: 4px;
 }
 
 .metric-label {
-  color: #666;
   font-size: 14px;
   margin-bottom: 16px;
 }
@@ -925,182 +726,107 @@ function setActiveReport(reportType: string): void {
 .metric-trend {
   display: flex;
   align-items: center;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 16px;
 }
 
 .metric-trend.positive {
-  color: #4caf50;
+  color: var(--success-color);
+  background-color: rgba(76, 175, 80, 0.15);
 }
 
 .metric-trend.negative {
-  color: #f44336;
+  color: var(--error-color);
+  background-color: rgba(244, 67, 54, 0.15);
 }
 
 .metric-trend svg {
   margin-right: 4px;
 }
 
-.productivity-section,
-.comparison-section {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  margin-bottom: 24px;
-}
-
-.productivity-section h3,
-.comparison-section h3 {
-  margin: 0 0 20px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #333;
-}
-
-.productivity-chart {
-  display: flex;
-  gap: 32px;
-}
-
-.score-gauge {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.score-value {
-  position: absolute;
-  bottom: 24px;
-  font-size: 32px;
+/* Detailed Report Styles */
+.detailed-report h2 {
+  font-size: 24px;
   font-weight: 600;
-  color: #333;
+  margin: 0 0 8px 0;
 }
 
-.score-label {
-  font-size: 13px;
-  color: #666;
+.detailed-report > p {
+  font-size: 16px;
+  margin: 0 0 24px 0;
 }
 
-.score-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  justify-content: center;
+.tasks-table-container {
+  overflow-x: auto;
+  padding: 24px;
 }
 
-.score-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.no-tasks {
+  text-align: center;
+  padding: 48px 0;
+  font-size: 16px;
 }
 
-.score-name {
-  width: 160px;
-  font-size: 14px;
-  color: #666;
-}
-
-.score-bar-container {
-  flex: 1;
-  height: 8px;
-  background-color: #e6e6e6;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.score-bar {
-  height: 100%;
-  background-color: #4caf50;
-  border-radius: 4px;
-}
-
-.score-percentage {
-  width: 40px;
-  font-size: 14px;
-  font-weight: 500;
-  text-align: right;
-  color: #333;
-}
-
-.comparison-chart {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  height: 260px;
-  padding-top: 20px;
-  margin-bottom: 16px;
-}
-
-.month-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 16%;
-}
-
-.month-bar-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.tasks-table {
   width: 100%;
+  border-collapse: collapse;
 }
 
-.month-bar {
-  width: 40px;
-  background-color: #3498db;
-  border-radius: 4px 4px 0 0;
-}
-
-.month-bar.current {
-  background-color: #ff3d57;
-}
-
-.month-label {
-  margin-bottom: 8px;
-  font-size: 13px;
-  color: #666;
-}
-
-.month-value {
-  margin-top: 8px;
-  font-size: 14px;
+.tasks-table th {
+  padding: 12px 16px;
+  text-align: left;
   font-weight: 500;
-  color: #333;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.comparison-legend {
-  display: flex;
-  justify-content: center;
-  gap: 24px;
+.tasks-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.theme-status-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
 }
 
-.legend-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  background-color: #3498db;
+.theme-status-pill.pending {
+  background-color: rgba(76, 175, 80, 0.15);
+  color: var(--status-new);
 }
 
-.legend-color.current {
-  background-color: #ff3d57;
+.theme-status-pill.in-progress {
+  background-color: rgba(33, 150, 243, 0.15);
+  color: var(--status-in-progress);
 }
 
-.legend-label {
-  font-size: 13px;
-  color: #666;
+.theme-status-pill.completed {
+  background-color: rgba(156, 39, 176, 0.15);
+  color: var(--status-completed);
 }
 
-/* Replace the placeholder chart style */
-.placeholder-chart {
-  display: none;
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .date-filter {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .summary-cards,
+  .charts-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .chart-bar {
+    width: 30px;
+  }
 }
 </style> 

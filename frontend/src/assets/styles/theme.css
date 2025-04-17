@@ -1,0 +1,220 @@
+/* Theme-aware utility classes for consistent styling across the application */
+
+/* Background colors */
+.theme-bg-primary {
+    background-color: var(--bg-primary);
+}
+
+.theme-bg-secondary {
+    background-color: var(--bg-secondary);
+}
+
+.theme-bg-tertiary {
+    background-color: var(--bg-tertiary);
+}
+
+.theme-bg-card {
+    background-color: var(--bg-card);
+}
+
+/* Text colors */
+.theme-text-primary {
+    color: var(--text-primary);
+}
+
+.theme-text-secondary {
+    color: var(--text-secondary);
+}
+
+.theme-text-disabled {
+    color: var(--text-disabled);
+}
+
+/* Border colors */
+.theme-border {
+    border-color: var(--border-color);
+}
+
+.theme-divider {
+    background-color: var(--divider-color);
+}
+
+/* Common component styles with theme support */
+.theme-card {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.theme-input {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.theme-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.theme-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.theme-button-primary {
+    background-color: var(--primary-color);
+    color: var(--primary-text);
+}
+
+.theme-button-primary:hover {
+    background-color: var(--primary-dark);
+}
+
+.theme-button-secondary {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.theme-button-secondary:hover {
+    background-color: var(--hover-bg);
+}
+
+/* Status colors */
+.theme-status-new {
+    color: var(--status-new);
+}
+
+.theme-status-in-progress {
+    color: var(--status-in-progress);
+}
+
+.theme-status-review {
+    color: var(--status-review);
+}
+
+.theme-status-completed {
+    color: var(--status-completed);
+}
+
+.theme-bg-status-new {
+    background-color: var(--status-new);
+}
+
+.theme-bg-status-in-progress {
+    background-color: var(--status-in-progress);
+}
+
+.theme-bg-status-review {
+    background-color: var(--status-review);
+}
+
+.theme-bg-status-completed {
+    background-color: var(--status-completed);
+}
+
+/* View container - should be used on the root element of each view */
+.theme-view-container {
+    min-height: 100vh;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Loading spinner with theme support */
+.theme-loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid var(--primary-color);
+    animation: spin 1s linear infinite;
+}
+
+.dark-theme .theme-loader {
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top: 4px solid var(--primary-color);
+}
+
+/* Common dashboard/layout styles */
+.theme-dashboard-layout {
+    display: flex;
+    flex: 1;
+}
+
+.theme-main-content {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Status pills */
+.theme-status-pill {
+    border-radius: 12px;
+    padding: 4px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.theme-status-pill.new {
+    background-color: rgba(76, 175, 80, 0.15);
+    color: var(--status-new);
+}
+
+.theme-status-pill.in-progress {
+    background-color: rgba(33, 150, 243, 0.15);
+    color: var(--status-in-progress);
+}
+
+.theme-status-pill.review {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: var(--status-review);
+}
+
+.theme-status-pill.completed {
+    background-color: rgba(156, 39, 176, 0.15);
+    color: var(--status-completed);
+}
+
+/* Dashboard cards for tasks */
+.theme-task-card {
+    background-color: var(--bg-card);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color);
+    padding: 16px;
+    margin-bottom: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.theme-task-card .task-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.theme-task-card .task-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+/* Common animations */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

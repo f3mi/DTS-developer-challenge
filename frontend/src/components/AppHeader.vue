@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import ThemeSwitcher from './ThemeSwitcher.vue';
 
 interface Task {
   id: number;
@@ -80,6 +81,10 @@ const viewTask = (taskId: number) => {
 
       <!-- Actions section -->
       <div class="actions-section">
+          <!-- Theme switcher -->
+          <ThemeSwitcher />
+          
+          <!-- Notification button -->
           <button 
           class="notification-button"
             @click="showReminders = !showReminders"
@@ -117,13 +122,14 @@ const viewTask = (taskId: number) => {
 
 <style scoped>
 .monday-header {
-  background-color: #fff;
-  border-bottom: 1px solid #e6e9ef;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 100;
   height: 56px;
   padding: 0 16px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .header-container {
@@ -167,30 +173,30 @@ const viewTask = (taskId: number) => {
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  color: #676879;
+  color: var(--text-secondary);
 }
 
 .search-input {
   width: 100%;
   height: 40px;
-  background-color: #f5f6f8;
+  background-color: var(--bg-tertiary);
   border: 1px solid transparent;
   border-radius: 8px;
   padding: 0 12px 0 40px;
   font-size: 14px;
-  color: #323338;
+  color: var(--text-primary);
   transition: all 0.2s;
 }
 
 .search-input:focus {
-  background-color: #fff;
-  border-color: #c3c6d4;
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
   outline: none;
-  box-shadow: 0 0 0 2px rgba(0, 115, 234, 0.2);
+  box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 .search-input::placeholder {
-  color: #676879;
+  color: var(--text-secondary);
 }
 
 .actions-section {
@@ -206,7 +212,7 @@ const viewTask = (taskId: number) => {
   border-radius: 8px;
   border: none;
   background-color: transparent;
-  color: #676879;
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -215,8 +221,8 @@ const viewTask = (taskId: number) => {
 }
 
 .notification-button:hover {
-  background-color: #f5f6f8;
-  color: #323338;
+  background-color: var(--hover-bg);
+  color: var(--text-primary);
 }
 
 .notification-button svg {
