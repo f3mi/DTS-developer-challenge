@@ -503,8 +503,8 @@ const retryLoading = async () => {
                 <path d="M10 3v10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </button>
-          </div>
-          
+        </div>
+        
           <div class="results-info theme-text-secondary">
             Showing {{ filteredTasks.length > 0 ? (currentPage - 1) * tasksPerPage + 1 : 0 }} - 
             {{ Math.min(currentPage * tasksPerPage, filteredTasks.length) }} 

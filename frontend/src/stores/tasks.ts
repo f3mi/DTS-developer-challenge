@@ -147,8 +147,8 @@ export const useTaskStore = defineStore('tasks', () => {
       const updatedTask = response.data.task
 
       // Update the task in our local state
-      const index = tasks.value.findIndex((task) => task.id === id)
-      if (index !== -1) {
+    const index = tasks.value.findIndex((task) => task.id === id)
+    if (index !== -1) {
         tasks.value[index] = updatedTask
       }
 
@@ -183,7 +183,7 @@ export const useTaskStore = defineStore('tasks', () => {
     try {
       await axios.delete(`${apiUrl}/tasks/${id}`, getHeaders())
       // Remove from local state
-      tasks.value = tasks.value.filter((task) => task.id !== id)
+    tasks.value = tasks.value.filter((task) => task.id !== id)
       notificationStore.success(`"${taskTitle}" has been deleted successfully`)
     } catch (err: any) {
       console.error('Error deleting task:', err)

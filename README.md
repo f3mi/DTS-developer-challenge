@@ -25,7 +25,7 @@ Caseworkers at HMCTS require a system to manage their daily tasks efficiently. T
 - Jest (for unit testing)
 
 ### Frontend
-- Vue.js 3
+- Vue.js 3 (Composition API)
 - Pinia (state management)
 - Vue Router
 - Axios
@@ -64,7 +64,7 @@ Caseworkers at HMCTS require a system to manage their daily tasks efficiently. T
 ## 📚 Documentation
 
 For more detailed information, please refer to the documentation:
-
+- [Approach](APPROACH.md) - Technical Approach to DTS Developer Challenge 
 - [API Documentation](docs/api.md) - Complete REST API endpoints reference
 - [Frontend Documentation](docs/frontend.md) - Frontend architecture and components
 - [Backend Documentation](docs/backend.md) - Backend architecture and database schema
@@ -83,28 +83,75 @@ For more detailed information, please refer to the documentation:
 ### Backend Setup
 
 ```bash
+# Navigate to the backend directory
 cd backend
+
+# Install dependencies
 npm install
-cp .env.example .env  # Edit database credentials accordingly
-npx sequelize-cli db:migrate
-npx sequelize-cli db:seed:all  # Optional: adds sample data
-npm run dev  # Starts the server on localhost:3000 
+
+# Create and configure environment variables
+cp .env.example .env
+# Edit the .env file with your database credentials and settings
+```
+
+### Database Setup
+
+```bash
+# Create the database (if it doesn't exist yet)
+# Using PostgreSQL command line or a GUI tool like pgAdmin
+createdb task_management
+
+# Run database migrations first - this creates all required tables
+npm run migration
+
+# IMPORTANT: Always run migrations before seeders to avoid errors
+# Seed the database with sample data
+npm run seed:ordered  # Seeds users first, then tasks with proper references
+```
+
+### Running the Backend
+
+```bash
+# Start the development server
+npm run dev  # Runs on http://localhost:3000 by default
+
+# For production
+npm start
 ```
 
 ### Frontend Setup
 
 ```bash
+# Navigate to the frontend directory
 cd frontend
+
+# Install dependencies
 npm install
+
+# Create and configure environment variables
 cp .env.example .env  # Set API URL if different from default
+
+# Start the development server
 npm run dev  # Starts the frontend on localhost:5173
 ```
 
 ### Running Tests
 ```bash
 cd backend
-npm run test
+npm test
 ```
+
+### Troubleshooting
+
+If you encounter errors like `relation "Tasks" does not exist` when running seeders:
+1. Ensure migrations have been run first
+2. If problems persist, you may need to recreate the database:
+   ```bash
+   dropdb task_management
+   createdb task_management
+   npm run migration
+   npm run seed:ordered
+   ```
 
 ---
 

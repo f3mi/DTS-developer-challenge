@@ -33,8 +33,14 @@ This guide provides instructions for deploying the Task Management System in dif
 
 4. Run database migrations and seeders:
    ```bash
-   npx sequelize-cli db:migrate
-   npx sequelize-cli db:seed:all
+   # Create the database if it doesn't exist yet
+   createdb task_management
+
+   # Run migrations first - this creates all required tables
+   npm run migration
+   
+   # Then seed the database - IMPORTANT: Always run migrations before seeders
+   npm run seed:ordered
    ```
 
 5. Start the development server:
@@ -78,16 +84,28 @@ This guide provides instructions for deploying the Task Management System in dif
    NODE_ENV=production
    PORT=3000
    JWT_SECRET=your_secure_jwt_secret
+   JWT_EXPIRES_IN=24h
+   BCRYPT_SALT_ROUNDS=10
+
    DB_HOST=your_db_host
    DB_PORT=5432
    DB_NAME=your_db_name
    DB_USER=your_db_user
    DB_PASSWORD=your_db_password
+
+   CORS_ORIGIN=https://your-frontend-domain.com
    ```
 
-2. Build the backend (if applicable):
+2. Create and prepare the database:
    ```bash
-   npm run build
+   # Create the production database if needed
+   createdb your_db_name
+   
+   # Run database migrations
+   NODE_ENV=production npm run migration
+   
+   # Optionally seed the database (after migrations)
+   NODE_ENV=production npm run seed:ordered
    ```
 
 3. Start the production server:
@@ -122,7 +140,8 @@ This guide provides instructions for deploying the Task Management System in dif
    ```
 3. Deploy your code to the server
 4. Configure environment variables
-5. Start the application with PM2:
+5. Prepare the database (create, migrate, seed in that order)
+6. Start the application with PM2:
    ```bash
    pm2 start server.js --name task-management-api
    ```
@@ -176,11 +195,14 @@ This project can be containerized using Docker for easier deployment.
          - NODE_ENV=production
          - PORT=3000
          - JWT_SECRET=your_secret
+         - JWT_EXPIRES_IN=24h
+         - BCRYPT_SALT_ROUNDS=10
          - DB_HOST=db
          - DB_PORT=5432
          - DB_NAME=task_management
          - DB_USER=postgres
          - DB_PASSWORD=your_password
+         - CORS_ORIGIN=http://localhost
        depends_on:
          - db
      
@@ -209,6 +231,15 @@ This project can be containerized using Docker for easier deployment.
 4. Start the containers:
    ```bash
    docker-compose up -d
+   ```
+
+5. Initialize the database (migrations and seeders):
+   ```bash
+   # Run migrations inside the backend container
+   docker-compose exec backend npm run migration
+   
+   # Then run seeders (only after migrations are complete)
+   docker-compose exec backend npm run seed:ordered
    ```
 
 ### Option 3: Cloud Platform Deployment
@@ -242,6 +273,12 @@ This project can be containerized using Docker for easier deployment.
    git push heroku main
    ```
 
+4. Run migrations and seeders:
+   ```bash
+   heroku run "cd backend && npm run migration"
+   heroku run "cd backend && npm run seed:ordered"
+   ```
+
 #### AWS Deployment
 
 1. Backend: Deploy to AWS Elastic Beanstalk or EC2
@@ -261,7 +298,31 @@ When updating the database schema in production:
 
 3. Run the migration on the production database:
    ```bash
-   NODE_ENV=production npx sequelize-cli db:migrate
+   NODE_ENV=production npm run migration
+   ```
+
+## Troubleshooting Database Issues
+
+If you encounter errors like `relation "Tasks" does not exist` when running seeders:
+
+1. Ensure migrations have been run first:
+   ```bash
+   npm run migration
+   ```
+
+2. If problems persist, you may need to recreate the database:
+   ```bash
+   # In development
+   dropdb task_management
+   createdb task_management
+   npm run migration
+   npm run seed:ordered
+   
+   # In production - be careful! This will delete all data
+   NODE_ENV=production dropdb your_db_name
+   NODE_ENV=production createdb your_db_name
+   NODE_ENV=production npm run migration
+   NODE_ENV=production npm run seed:ordered
    ```
 
 ## SSL Configuration

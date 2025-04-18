@@ -6,10 +6,11 @@ The frontend of the Task Management System is built with Vue.js 3 and follows a 
 
 ## Tech Stack
 
-- **Vue.js 3**: Frontend framework
+- **Vue.js 3**: Frontend framework with Composition API
 - **Vue Router**: Client-side routing
 - **Pinia**: State management
 - **Axios**: HTTP requests
+- **Chart.js**: Data visualization
 
 ## Project Structure
 
@@ -28,6 +29,34 @@ frontend/
 │   └── main.js         # Application entry point
 ├── .env.example        # Environment variables template
 └── vite.config.js      # Vite configuration
+```
+
+## Running the Frontend
+
+The frontend is a Vue.js single-page application that communicates with the backend API.
+It is designed to be used in conjunction with the Node.js/Express backend (documented separately in [backend.md](./backend.md)).
+
+To set up and run the frontend:
+
+```bash
+# Navigate to the frontend directory
+cd frontend
+
+# Install dependencies
+npm install
+
+# Create and configure environment variables
+cp .env.example .env
+# Edit the .env file with your API URL if different from default
+
+# Start the development server
+npm run dev          # Runs on http://localhost:5173 by default
+
+# For production build
+npm run build
+
+# Preview the production build locally
+npm run preview
 ```
 
 ## Key Components

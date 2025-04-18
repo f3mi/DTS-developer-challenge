@@ -18,6 +18,8 @@ My approach was guided by several key principles:
 
 5. **Performance Optimization**: Ensuring the application remains responsive and efficient, even when handling large datasets or complex operations.
 
+6. **Design Patterns and Architecture**: Following established software architecture patterns to ensure code organization, maintainability, and scalability.
+
 ## Technical Implementation
 
 ### Architecture
@@ -25,6 +27,11 @@ My approach was guided by several key principles:
 I chose a modern client-server architecture with these key components:
 
 - **Backend**: Node.js/Express REST API with PostgreSQL database
+  - Implements an API-oriented architecture for code organization
+  - Models using Sequelize ORM for data structure and business logic
+  - Controllers handling request processing and response generation
+  - Routes organized by resource for clear API structure
+  
 - **Frontend**: Vue.js 3 single-page application with Composition API
 - **State Management**: Pinia stores for frontend state
 - **Authentication**: JWT-based authentication with secure token handling
@@ -33,17 +40,26 @@ This architecture allows for clear separation of concerns while maintaining effi
 
 ### Backend Development
 
-1. **Database Design**: Created a normalized database schema using Sequelize ORM with proper relationships between users and tasks.
+1. **API-oriented Implementation**: 
+   - **Models**: Created clear data models with Sequelize that handle validation, relationships, and business logic
+   - **Controllers**: Implemented focused controllers with single responsibilities to handle specific API endpoints
+   - **Routes**: Organized API endpoints by resource with clear RESTful structure
 
-2. **API Structure**: Implemented RESTful endpoints following best practices for naming, HTTP methods, and status codes.
+2. **Database Design**: Created a normalized database schema using Sequelize ORM with proper relationships between users and tasks.
 
-3. **Authentication System**: Built secure user registration and login with password hashing, JWT tokens, and route protection.
+3. **API Structure**: Implemented RESTful endpoints following best practices for naming, HTTP methods, and status codes.
 
-4. **Input Validation**: Added comprehensive validation for all user inputs to prevent injection attacks and ensure data integrity.
+4. **Authentication System**: Built secure user registration and login with password hashing, JWT tokens, and route protection.
 
-5. **Error Handling**: Developed a consistent error handling strategy with meaningful error messages and appropriate HTTP status codes.
+5. **Input Validation**: Added comprehensive validation for all user inputs to prevent injection attacks and ensure data integrity.
 
-6. **Testing**: Wrote unit tests for critical components to ensure reliability and catch regressions.
+6. **Error Handling**: Developed a consistent error handling strategy with meaningful error messages and appropriate HTTP status codes.
+
+7. **Comprehensive Testing**: Created a multi-layered testing strategy:
+   - Unit tests for isolated component testing (controllers, middleware)
+   - Integration tests for API endpoints and flows
+   - Mock-based testing for predictable results
+   - Test suite organization following the application structure
 
 ### Frontend Development
 
@@ -93,17 +109,35 @@ This architecture allows for clear separation of concerns while maintaining effi
 
 **Solution**: Developed a comprehensive design system with consistent UI patterns, color schemes, spacing, and interaction behaviors. Implemented toast notifications to provide consistent feedback for user actions.
 
+### Challenge 6: Code Organization and Maintenance
+
+**Solution**: Implemented an API-oriented architecture to ensure clear separation of concerns, predictable code organization, and easier maintenance. Each model, controller, and route has a clear responsibility, making the codebase more manageable.
+
 ## Testing and Quality Assurance
 
-1. **Unit Testing**: Implemented Jest tests for critical backend components and API endpoints.
+1. **Comprehensive Test Strategy**: Implemented a multi-layered approach to testing:
+   - **Unit Tests**: Isolated testing of controllers, middleware, and model methods
+   - **Integration Tests**: End-to-end API testing with database interactions
+   - **Mock-Based Testing**: Using mock objects to test components in isolation
 
-2. **Accessibility Testing**: Ensured the application meets basic accessibility standards with proper semantic HTML, ARIA attributes, and keyboard navigation.
+2. **Test Organization**: Structured tests to mirror the application architecture:
+   - Tests grouped by component type (controllers, middleware)
+   - Each test file focused on a specific component
+   - Shared test utilities and mock data for consistency
 
-3. **Cross-browser Testing**: Verified functionality across major browsers (Chrome, Firefox, Safari, Edge).
+3. **Test Coverage**: Ensured comprehensive test coverage across:
+   - Authentication flows (register, login, token validation)
+   - Task management (create, read, update, delete)
+   - Error handling and edge cases
+   - Security mechanisms (middleware, validation)
 
-4. **Responsive Testing**: Tested the application on various device sizes to ensure proper layout and functionality.
+4. **Accessibility Testing**: Ensured the application meets basic accessibility standards with proper semantic HTML, ARIA attributes, and keyboard navigation.
 
-5. **Error Handling Testing**: Verified that the application gracefully handles various error conditions, including network issues, invalid inputs, and server errors.
+5. **Cross-browser Testing**: Verified functionality across major browsers (Chrome, Firefox, Safari, Edge).
+
+6. **Responsive Testing**: Tested the application on various device sizes to ensure proper layout and functionality.
+
+7. **Error Handling Testing**: Verified that the application gracefully handles various error conditions, including network issues, invalid inputs, and server errors.
 
 ## Future Enhancements
 
@@ -125,4 +159,4 @@ Given additional time, I would implement the following enhancements:
 
 This project demonstrates my approach to full-stack development, with a focus on creating a secure, responsive, and user-friendly application. The implementation showcases my technical skills across frontend and backend development, as well as my commitment to quality, security, and modern development practices.
 
-The result is a comprehensive Task Management System that meets the requirements of the DTS Developer Challenge while providing an excellent user experience and demonstrating technical proficiency. 
+The result is a comprehensive Task Management System that meets the requirements of the DTS Developer Challenge while providing an excellent user experience and demonstrating technical proficiency. The application follows an API-oriented architecture, implements thorough testing practices, and prioritizes user experience, security, and maintainability. 
