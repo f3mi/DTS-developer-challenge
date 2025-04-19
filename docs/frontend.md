@@ -86,7 +86,6 @@ The root component that initializes the application, including:
 | `Tasks.vue` | `/tasks` | Main task management interface |
 | `TaskDetails.vue` | `/tasks/:id` | Detailed view of a single task |
 | `Calendar.vue` | `/calendar` | Calendar view of tasks |
-| `Reports.vue` | `/reports` | Task analytics and reporting |
 | `Login.vue` | `/login` | User login |
 | `Register.vue` | `/register` | User registration |
 
