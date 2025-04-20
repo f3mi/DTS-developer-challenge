@@ -87,7 +87,7 @@ frontend/
 
 ```bash
 # Clone the repository
-git clone https://github.com/hmcts/dts-developer-challenge.git
+git clone https://github.com/f3mi/DTS-developer-challenge.git
 
 # Navigate to frontend directory
 cd dts-developer-challenge/frontend

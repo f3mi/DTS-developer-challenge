@@ -505,7 +505,7 @@ const retryLoading = async () => {
             </button>
         </div>
         
-          <div class="results-info theme-text-secondary">
+        <div class="results-info theme-text-secondary">
             Showing {{ filteredTasks.length > 0 ? (currentPage - 1) * tasksPerPage + 1 : 0 }} - 
             {{ Math.min(currentPage * tasksPerPage, filteredTasks.length) }} 
             of {{ filteredTasks.length }} tasks

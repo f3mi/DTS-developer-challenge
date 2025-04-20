@@ -2,11 +2,11 @@
  * SecureStorage Utility
  *
  * Provides encrypted storage for sensitive data in localStorage
- * Uses a simple XOR encryption for demonstration purposes
- * In a production environment, consider using a more robust encryption library
+ * I am using a simple XOR encryption for demonstration purposes
+ * In a production environment, I will consider using a more robust encryption library
  */
 
-// Secret key for encryption (in production, use an environment variable)
+// Secret key for encryption (in production, I will use an environment variable)
 const SECRET_KEY = import.meta.env.VITE_STORAGE_SECRET || 'default-secure-key-change-me'
 
 /**

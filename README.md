@@ -104,6 +104,7 @@ createdb task_management
 # Run database migrations first - this creates all required tables
 npm run migration
 
+# optuional
 # IMPORTANT: Always run migrations before seeders to avoid errors
 # Seed the database with sample data
 npm run seed:ordered  # Seeds users first, then tasks with proper references
