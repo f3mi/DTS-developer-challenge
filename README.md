@@ -65,10 +65,18 @@ Caseworkers at HMCTS require a system to manage their daily tasks efficiently. T
 
 For more detailed information, please refer to the documentation:
 - [Approach](APPROACH.md) - Technical Approach to DTS Developer Challenge 
+- [Product Requirements](docs/product_requirements.md) - Comprehensive PRD with wireframes and data models
 - [API Documentation](docs/api.md) - Complete REST API endpoints reference
 - [Frontend Documentation](docs/frontend.md) - Frontend architecture and components
 - [Backend Documentation](docs/backend.md) - Backend architecture and database schema
 - [Deployment Guide](docs/deployment.md) - Instructions for deploying the application
+
+### Wireframes and Diagrams
+The project includes wireframes and data model diagrams created with Mermaid:
+- [Dashboard Wireframe](docs/wireframes/tms-wireframe-dashboard-v1.md)
+- [Task Form Wireframe](docs/wireframes/tms-wireframe-task-form-v1.md)
+- [Data Model Diagram](docs/data-models/tms-data-model-v1.md)
+- [Diagrams Guide](docs/diagrams-readme.md)
 
 ---
 

@@ -22,22 +22,8 @@ graph TD
                 StatusField["Status*
                 [Not Started ▼]"]
                 
-                DueDateField["Due Date/Time*
-                [Date Picker][Time]"]
-            end
-            
-            subgraph FieldRow2
-                PriorityField["Priority
-                [Medium ▼]"]
-                
-                AssigneeField["Assignee
-                [Self ▼]"]
-            end
-            
-            subgraph AttachmentSection
-                AttachLabel["Attachments (Optional)"]
-                UploadBtn["[+ Add File]"]
-                FileList["No files attached"]
+                DueDateField["Due Date*
+                [Date Picker]"]
             end
         end
         
@@ -93,18 +79,6 @@ graph TD
             
             MobileDueDate["Due Date*
             [Date Picker]"]
-            
-            MobileDueTime["Time
-            [Time Picker]"]
-            
-            MobilePriority["Priority
-            [Medium ▼]"]
-            
-            MobileAssignee["Assignee
-            [Self ▼]"]
-            
-            MobileAttach["Attachments
-            [+ Add File]"]
         end
         
         subgraph MobileActions
@@ -114,36 +88,11 @@ graph TD
     end
 ```
 
-## Form Interaction States
-
-```mermaid
-flowchart TD
-    A[Empty Form] --> B{User Action}
-    B -->|Fill Required Fields| C[Form Valid]
-    B -->|Skip Required Fields| D[Form Invalid]
-    B -->|Add Attachment| E[Attachment Added]
-    B -->|Cancel| F[Discard Changes]
-    
-    C -->|Submit| G[Processing]
-    D -->|Submit| H[Show Validation Errors]
-    H --> B
-    G -->|Success| I[Show Success Message]
-    G -->|Failure| J[Show Error Message]
-    J --> B
-    
-    subgraph InteractionHints
-        K[Required Fields: * indicator]
-        L[Form Validation: Real-time feedback]
-        M[Error Messages: Below invalid fields]
-        N[Success Message: Toast notification]
-    end
-```
-
 ## Implementation Notes
 
 1. All required fields should be clearly marked with an asterisk (*)
-2. Form validation should occur in real-time as users complete fields
-3. The form should maintain state if submission fails to prevent data loss
-4. Consider implementing auto-save functionality for long form entries
-5. Mobile view should use full width but maintain the same validation logic
-6. Prioritize high-contrast field outlines and clear error messages for accessibility 
+2. Form validation should verify that Title and Status are provided
+3. Date picker should default to current date
+4. Error messages should appear below the invalid fields
+5. Mobile view should use the full width of the screen
+6. Save button should be disabled until all required fields are completed 

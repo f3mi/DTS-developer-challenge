@@ -2,6 +2,23 @@
 
 This directory contains wireframes and data models for the Task Management System project, created using Mermaid diagram syntax.
 
+## Diagram Overview
+
+The diagrams in this directory represent the actual implemented features of the Task Management System, including:
+
+1. **Basic Task Management**
+   - Task creation with title, description, status, and due date
+   - Task listing and filtering
+   - Status updates and deletion
+
+2. **User Authentication**
+   - Login and registration
+   - Session management
+
+3. **Dashboard**
+   - Task summary statistics
+   - Status distribution visualization
+
 ## Viewing the Diagrams
 
 ### Option 1: GitHub Rendering
@@ -37,15 +54,33 @@ docs/
 └── product_requirements.md   # Main PRD with guidelines
 ```
 
+## Database Structure
+
+The actual implemented database includes:
+- Users table (authentication and user information)
+- Tasks table (task details and assignments)
+- TaskStatuses table (predefined status options)
+
+The relationships are:
+- One user can have many tasks
+- Each task has one status
+
+## User Interface Implementation
+
+The implemented UI includes:
+- Dashboard with task statistics
+- Task list with filtering
+- Simple task creation form
+- Basic responsive design
+
 ## Converting to Professional Diagrams
 
-To convert these Mermaid diagrams to high-fidelity mockups and professional diagrams:
+To convert these Mermaid diagrams to high-fidelity mockups:
 
 1. Use the tools recommended in section 8 of the Product Requirements Document
 2. Export the diagrams from Mermaid Live Editor as a starting point
 3. Import into Figma, Adobe XD, or other design tools
 4. Enhance with proper styling, colors, and interactive elements
-5. Save the resulting files in the appropriate directories following naming conventions
 
 ## Naming Conventions
 

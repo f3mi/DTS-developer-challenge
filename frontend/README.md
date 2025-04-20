@@ -41,6 +41,16 @@ This is the frontend application for the HMCTS Task Management System, built wit
 - **Chart.js** - Data visualization
 - **CSS** - Custom theming system with CSS variables
 
+## 📋 Requirements and Design
+
+The frontend implementation is based on requirements and designs specified in:
+
+- [Product Requirements Document](../docs/product_requirements.md)
+- [Dashboard Wireframe](../docs/wireframes/tms-wireframe-dashboard-v1.md)
+- [Task Form Wireframe](../docs/wireframes/tms-wireframe-task-form-v1.md)
+
+These documents provide detailed specifications of user requirements, UI/UX design, and functionality.
+
 ## 🏗️ Project Structure
 
 ```

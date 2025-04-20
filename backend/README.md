@@ -161,6 +161,18 @@ npm test
 - `createdAt` - DateTime
 - `updatedAt` - DateTime
 
+For a more detailed view of the data model, refer to the [Data Model Diagram](../docs/data-models/tms-data-model-v1.md).
+
+## 📋 Requirements and Planning
+
+The backend API is developed based on requirements defined in the Product Requirements Document:
+
+- [Product Requirements Document](../docs/product_requirements.md)
+- [Wireframes](../docs/wireframes/)
+- [Data Models](../docs/data-models/)
+
+These documents outline the complete system specifications, user requirements, and design guidelines.
+
 ## 🔒 Authentication & Security
 
 - JWT-based authentication

@@ -8,17 +8,20 @@ This document outlines my approach to implementing the DTS Developer Challenge T
 
 My approach was guided by several key principles:
 
-1. **User-Centered Design**: Prioritizing the needs of caseworkers by creating an intuitive, efficient interface that minimizes friction in task management workflows.
+1. **Requirements-Driven Development**: Creating a comprehensive Product Requirements Document (PRD) with wireframes and data models to guide implementation decisions.
 
-2. **Full Stack Integration**: Building a cohesive application where frontend and backend components work seamlessly together, with clean API contracts and efficient data flow.
+2. **User-Centered Design**: Prioritizing the needs of caseworkers by creating an intuitive, efficient interface that minimizes friction in task management workflows.
 
-3. **Modern Technologies**: Utilizing current industry-standard technologies and frameworks to create a maintainable, extensible codebase.
+3. **Full Stack Integration**: Building a cohesive application where frontend and backend components work seamlessly together, with clean API contracts and efficient data flow.
 
-4. **Security First**: Implementing robust authentication, authorization, and data protection measures throughout the application.
+4. **Modern Technologies**: Utilizing current industry-standard technologies and frameworks to create a maintainable, extensible codebase.
 
-5. **Performance Optimization**: Ensuring the application remains responsive and efficient, even when handling large datasets or complex operations.
+5. **Security First**: Implementing robust authentication, authorization, and data protection measures throughout the application.
 
-6. **Design Patterns and Architecture**: Following established software architecture patterns to ensure code organization, maintainability, and scalability.
+6. **Performance Optimization**: Ensuring the application remains responsive and efficient, even when handling large datasets or complex operations.
+
+7. **Design Patterns and Architecture**: Following established software architecture patterns to ensure code organization, maintainability, and scalability.
+
 
 ## Technical Implementation
 
@@ -74,6 +77,8 @@ This architecture allows for clear separation of concerns while maintaining effi
 5. **Theming System**: Built a comprehensive theming system with light and dark modes, using CSS variables for consistent styling.
 
 6. **Dashboard and Visualizations**: Implemented interactive dashboards with Chart.js for data visualization and task analytics.
+
+7. **Wireframing**: Created wireframes to visually represent the UI components before implementation.
 
 ### Advanced Features
 
@@ -139,6 +144,16 @@ This architecture allows for clear separation of concerns while maintaining effi
 
 7. **Error Handling Testing**: Verified that the application gracefully handles various error conditions, including network issues, invalid inputs, and server errors.
 
+## Documentation and Planning
+
+1. **Product Requirements Document**: Created a comprehensive PRD detailing the system requirements, user stories, and technical specifications.
+
+2. **Wireframes**: Developed wireframes for key screens to visualize the user interface before implementation.
+
+3. **Data Models**: Created database schema diagrams to document the data structure and relationships.
+
+4. **Documentation**: Maintained thorough documentation of the API endpoints, frontend components, and deployment procedures.
+
 ## Future Enhancements
 
 Given additional time, I would implement the following enhancements:
@@ -154,6 +169,8 @@ Given additional time, I would implement the following enhancements:
 5. **Performance Optimizations**: Additional caching strategies and lazy-loading techniques for handling larger datasets.
 
 6. **Enhanced Testing**: More comprehensive test coverage, including end-to-end tests with Cypress or similar tools.
+
+7. **Extended Wireframes**: Additional high-fidelity wireframes and prototypes for all screens and user flows.
 
 ## Conclusion
 
