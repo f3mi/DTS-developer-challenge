@@ -14,7 +14,7 @@ const logoutSuccess = ref(false)
 const currentRoute = computed(() => {
   const path = router.currentRoute.value.path
   if (path.startsWith('/dashboard')) return 'dashboard'
-  if (path.startsWith('/tasks')) return 'my-tasks'
+  if (path.startsWith('/tasks') || path.startsWith('/task-details')) return 'my-tasks'
   if (path.startsWith('/calender')) return 'calendar'
   if (path.startsWith('/reports')) return 'reports'
   return ''

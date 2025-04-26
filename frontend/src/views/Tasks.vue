@@ -134,7 +134,10 @@ const deleteTask = async (taskId: number) => {
 
 // View task details
 const viewTaskDetails = (taskId: number) => {
-  router.push(`/task/${taskId}`)
+  router.push({
+    name: 'task-details',
+    query: { id: taskId.toString() }
+  })
 }
 
 // Form state for creating a new task

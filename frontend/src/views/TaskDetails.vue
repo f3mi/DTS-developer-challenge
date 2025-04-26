@@ -7,12 +7,15 @@ import AppHeader from '../components/AppHeader.vue'
 import Sidebar from '../components/Sidebar.vue'
 import { useNotificationStore } from '../stores/notification'
 
+const props = defineProps<{
+  taskId: number
+}>()
+
 const router = useRouter()
 const route = useRoute()
 const taskStore = useTaskStore()
 const themeStore = useThemeStore()
 const notificationStore = useNotificationStore()
-const taskId = computed(() => Number(route.params.id))
 const isEditing = ref(false)
 const isLoading = ref(true)
 const errorMessage = ref('')
@@ -30,7 +33,7 @@ const editForm = ref({
 onMounted(async () => {
   try {
     isLoading.value = true
-    const fetchedTask = await taskStore.getTaskById(taskId.value)
+    const fetchedTask = await taskStore.getTaskById(props.taskId)
     
     if (fetchedTask) {
       task.value = fetchedTask
@@ -93,7 +96,7 @@ const saveTask = async () => {
   
   try {
     isLoading.value = true
-    const updatedTask = await taskStore.updateTask(taskId.value, {
+    const updatedTask = await taskStore.updateTask(props.taskId, {
       title: editForm.value.title,
       description: editForm.value.description,
       status: editForm.value.status,
@@ -117,7 +120,7 @@ const deleteTask = async () => {
   if (confirm('Are you sure you want to delete this task?')) {
     try {
       isLoading.value = true
-      await taskStore.deleteTask(taskId.value)
+      await taskStore.deleteTask(props.taskId)
       notificationStore.success('Task deleted successfully')
       router.push('/tasks')
     } catch (error) {

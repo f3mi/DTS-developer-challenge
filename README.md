@@ -2,6 +2,14 @@
 
 A full-stack application for managing caseworker tasks, developed as part of the HMCTS DTS Developer Technical Test. This system allows users to create, view, update, and delete tasks, with a simple and user-friendly interface.
 
+## 📸 Application Preview
+
+### Dashboard View
+![Dashboard View](docs/images/dashboard-preview.svg)
+
+### Tasks Management View
+![Tasks View](docs/images/tasks-preview.svg)
+
 ## 🔍 Project Overview
 
 Caseworkers at HMCTS require a system to manage their daily tasks efficiently. This project includes:
@@ -65,6 +73,7 @@ Caseworkers at HMCTS require a system to manage their daily tasks efficiently. T
 
 For more detailed information, please refer to the documentation:
 - [Approach](APPROACH.md) - Technical Approach to DTS Developer Challenge 
+- [Architecture Document](docs/architecture.md) - System architecture and component design
 - [Product Requirements](docs/product_requirements.md) - Comprehensive PRD with wireframes and data models
 - [API Documentation](docs/api.md) - Complete REST API endpoints reference
 - [Frontend Documentation](docs/frontend.md) - Frontend architecture and components
